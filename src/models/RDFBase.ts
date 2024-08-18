@@ -1,9 +1,13 @@
 export class RDFBase {
-    private resource: Subject;
+    private subject: Subject;
     private properties: Map<string, string[]>;
 
-    constructor(resource: Subject) {
-        this.resource = resource;
+    public get resource(): Resource {
+        return this.subject as Resource;
+    }
+
+    constructor(subject: Subject) {
+        this.subject = subject;
         this.properties = new Map<string, string[]>();
     }
 
@@ -18,7 +22,7 @@ export class RDFBase {
     }
 
     public toString(): string {
-        return `${this.resource} ${Array.from(this.properties.entries())
+        return `${this.subject} ${Array.from(this.properties.entries())
             .map(([predicate, objects]) => {
                 return (
                     predicate +
@@ -29,7 +33,7 @@ export class RDFBase {
             .join(" ; ")} .`;
     }
 
-    public async semantize(context: Resource): Promise<void> {
+    public async semantize(context?: Resource): Promise<void> {
         // semantize and send it to the server
     }
 }
@@ -58,7 +62,8 @@ export class Resource {
     }
 
     public toString(): string {
-        return process.env.ONTOLOGY_PREFIX + this.id;
+        if (this.id === "a") return "a";
+        else return process.env.ONTOLOGY_PREFIX + this.id;
     }
 }
 
