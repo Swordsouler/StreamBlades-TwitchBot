@@ -1,6 +1,6 @@
 import { RDFBase, Resource, XSDData } from "../RDFBase";
 
-export abstract class User extends RDFBase {
+export class User extends RDFBase {
     public userId: string;
     public displayName: string;
     protected accessToken: string;
@@ -8,15 +8,26 @@ export abstract class User extends RDFBase {
     protected get ready(): boolean {
         return !!this.accessToken;
     }
+    private refreshTimeout: NodeJS.Timeout;
 
     constructor(userId: string, displayName?: string, refreshToken?: string) {
         super(new Resource("twitch_" + userId));
         this.userId = userId;
         this.displayName = displayName;
+        if (this.displayName)
+            this.addProperty(
+                "hasDisplayName",
+                new XSDData(this.displayName, "string")
+            );
         this.refreshToken = refreshToken;
+        if (!this.refreshToken) return;
         const load = async () => {
             await this.refreshAccessToken();
-            await this.loadDisplayName();
+            if (!this.ready) {
+                console.error(`Failed to load user ${this.userId}.`);
+                return;
+            }
+            if (!this.displayName) await this.loadDisplayName();
             this.onReady();
         };
         load();
@@ -30,8 +41,8 @@ export abstract class User extends RDFBase {
             );
     }
 
-    public async refreshAccessToken() {
-        if (!this.refreshToken) return;
+    public async refreshAccessToken(): Promise<string> {
+        if (!this.refreshToken) return "";
 
         const response = await fetch("https://id.twitch.tv/oauth2/token", {
             method: "POST",
@@ -51,11 +62,16 @@ export abstract class User extends RDFBase {
                 `Failed to refresh access token for user ${this.userId}`,
                 data
             );
-            return;
+            return "";
         }
         const data = await response.json();
         this.accessToken = data.access_token;
-        setTimeout(this.refreshAccessToken, data.expires_in * 1000);
+        clearTimeout(this.refreshTimeout);
+        this.refreshTimeout = setTimeout(
+            this.refreshAccessToken,
+            data.expires_in * 1000
+        );
+        return this.accessToken;
     }
 
     protected async loadDisplayName(): Promise<void> {
@@ -86,5 +102,13 @@ export abstract class User extends RDFBase {
         }
         const data = await response.json();
         this.displayName = data.data[0].display_name;
+        this.addProperty(
+            "hasDisplayName",
+            new XSDData(this.displayName, "string")
+        );
+    }
+
+    public async semantize(context?: Resource): Promise<void> {
+        super.semantize();
     }
 }

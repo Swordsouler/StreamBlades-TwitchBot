@@ -11,7 +11,7 @@ export class RDFBase {
         this.properties = new Map<string, string[]>();
     }
 
-    public addProperty(predicate: Predicate, object: Object) {
+    public addProperty(predicate: Predicate, object: Object): Triple {
         const predicateString = predicate.toString();
         if (!this.properties.has(predicateString))
             this.properties.set(predicateString, []);
@@ -19,6 +19,12 @@ export class RDFBase {
         const objectString = object.toString();
         if (!this.properties.get(predicateString)?.includes(objectString))
             this.properties.get(predicateString)?.push(objectString);
+
+        return new Triple(
+            this.subject as Resource,
+            predicate as Resource,
+            object as Resource
+        );
     }
 
     public toString(): string {
@@ -27,13 +33,17 @@ export class RDFBase {
                 return (
                     predicate +
                     " " +
-                    objects.map((object) => object.toString()).join(" , ")
+                    objects.map((object) => object.toString()).join(" ,\n\t\t")
                 );
             })
-            .join(" ; ")} .`;
+            .join(" ;\n\t")} .`;
     }
 
     public async semantize(context?: Resource): Promise<void> {
+        let toSemantize = this.toString();
+        if (context) toSemantize = `graph ${context} {\n${toSemantize}\n}`;
+
+        console.log(toSemantize);
         // semantize and send it to the server
     }
 }
@@ -43,10 +53,10 @@ export class Triple {
     private predicate: Resource;
     private object: Resource;
 
-    constructor(subject: string, predicate: string, object: string) {
-        this.subject = new Resource(subject);
-        this.predicate = new Resource(predicate);
-        this.object = new Resource(object);
+    constructor(subject: Resource, predicate: Resource, object: Resource) {
+        this.subject = subject;
+        this.predicate = predicate;
+        this.object = object;
     }
 
     public toString(): string {
@@ -62,24 +72,18 @@ export class Resource {
     }
 
     public toString(): string {
-        if (this.id === "a") return "a";
-        else return process.env.ONTOLOGY_PREFIX + this.id;
+        return process.env.ONTOLOGY_PREFIX + this.id;
     }
 }
 
-export type DataType =
-    | "string"
-    | "integer"
-    | "boolean"
-    | "dateTime"
-    | "dateTimeDuration";
+export type DataType = "string" | "integer" | "boolean" | "dateTime";
 
 export class XSDData {
     private value: string;
     private type: DataType;
 
-    constructor(value: string, type: DataType) {
-        this.value = value;
+    constructor(value: string | number | boolean, type: DataType) {
+        this.value = value.toString();
         this.type = type;
     }
 
@@ -89,5 +93,5 @@ export class XSDData {
 }
 
 export type Subject = Resource | Triple;
-export type Predicate = Resource;
+export type Predicate = Resource | string;
 export type Object = Resource | XSDData;

@@ -27,5 +27,11 @@ console.log(RDF2.toString());*/
 const Swordsouler = new Streamer(
     "107968853",
     "",
-    "zmivaw9virawgy1r97dpvihk8lpjw834b4t9p58ujzb60ak3ki"
+    "0do9olkmornqn8fjxlfdz66ri7vgad38rd49ejq5yrczw90ab1"
 );
+
+/*const CrocodyleTV = new Streamer(
+    "101234264",
+    "",
+    "l7mat2qhfh0r588svs7xya1f530hr78qbtg463h90ofz45miax"
+);*/
