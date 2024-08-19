@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { EventSubscription } from "./EventSubscription";
 
 export type FollowData = {
@@ -20,5 +21,18 @@ export class FollowSubscription extends EventSubscription {
             "2",
             callback
         );
+    }
+    protected generateRandomData(): FollowData {
+        const user_username = faker.internet.userName();
+        const broadcaster_username = faker.internet.userName();
+        return {
+            user_id: faker.string.uuid(),
+            user_login: user_username.toLowerCase(),
+            user_name: user_username,
+            broadcaster_user_id: faker.string.uuid(),
+            broadcaster_user_login: broadcaster_username.toLowerCase(),
+            broadcaster_user_name: broadcaster_username,
+            followed_at: faker.date.recent().toISOString(),
+        };
     }
 }

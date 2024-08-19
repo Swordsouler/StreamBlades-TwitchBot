@@ -18,10 +18,11 @@ export class SubscriptionGift extends Subscription {
             new Resource("hasTotal"),
             new XSDData(data.total, "integer")
         );
-        this.addProperty(
-            new Resource("hasCumulativeTotal"),
-            new XSDData(data.cumulative_total, "integer")
-        );
+        if (data.cumulative_total)
+            this.addProperty(
+                new Resource("hasCumulativeTotal"),
+                new XSDData(data.cumulative_total, "integer")
+            );
         this.addProperty(
             new Resource("isAnonymous"),
             new XSDData(data.is_anonymous, "boolean")

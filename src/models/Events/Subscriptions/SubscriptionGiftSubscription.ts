@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { EventSubscription } from "./EventSubscription";
 
 export type SubscriptionGiftData = {
@@ -25,5 +26,22 @@ export class SubscriptionGiftSubscription extends EventSubscription {
             "1",
             callback
         );
+    }
+
+    protected generateRandomData(): SubscriptionGiftData {
+        const userUsername = faker.internet.userName();
+        const broadcasterUsername = faker.internet.userName();
+        return {
+            user_id: faker.string.uuid(),
+            user_login: userUsername.toLowerCase(),
+            user_name: userUsername,
+            broadcaster_user_id: faker.string.uuid(),
+            broadcaster_user_login: broadcasterUsername.toLowerCase(),
+            broadcaster_user_name: broadcasterUsername,
+            total: faker.number.int({ min: 1, max: 100 }),
+            tier: faker.helpers.arrayElement(["1000", "2000", "3000"]),
+            cumulative_total: faker.number.int({ min: 1, max: 1000 }),
+            is_anonymous: faker.datatype.boolean(),
+        };
     }
 }

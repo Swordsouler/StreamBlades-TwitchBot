@@ -22,6 +22,7 @@ export abstract class ViewerEvent extends TwitchEvent {
     }
 
     public async semantize(context?: Resource): Promise<void> {
+        if (!this.triggeredDuring) return;
         super.semantize(context);
         this.triggeredBy.semantize();
     }

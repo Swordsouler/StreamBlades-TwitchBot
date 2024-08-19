@@ -9,7 +9,7 @@ export type TwitchEventProps = {
 };
 
 export abstract class TwitchEvent extends RDFBase {
-    triggeredDuring: LiveStream;
+    protected triggeredDuring: LiveStream;
 
     constructor(props: TwitchEventProps) {
         const eventId = props.eventId || uuidv4();
@@ -21,5 +21,10 @@ export abstract class TwitchEvent extends RDFBase {
                 this.triggeredDuring.resource
             );
         }
+    }
+
+    public semantize(context?: Resource): Promise<void> {
+        if (!this.triggeredDuring) return;
+        return super.semantize(context);
     }
 }

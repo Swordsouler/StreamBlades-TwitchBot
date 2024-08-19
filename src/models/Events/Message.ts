@@ -51,7 +51,7 @@ export class Message extends ViewerEvent {
             this.addProperty(new Resource("hasEmote"), emote.resource);
         });
         for (const fragment of data.message.fragments) {
-            if (fragment.type === "emote") {
+            if (fragment.type === "emote" && fragment.emote) {
                 const id = fragment.emote.id;
                 const code = fragment.text;
                 if (!this.emotes[id]) {
@@ -67,6 +67,7 @@ export class Message extends ViewerEvent {
     }
 
     public async semantize(context?: Resource): Promise<void> {
+        if (!this.triggeredDuring) return;
         super.semantize(context);
         for (const emote of Object.values(this.emotes)) emote.semantize();
         for (const { badge, hasBadge } of this.badges) {

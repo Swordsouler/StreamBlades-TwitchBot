@@ -1,5 +1,3 @@
-import { Streamer } from "../../Users/Streamer";
-
 export abstract class EventSubscription {
     public type: string;
     public condition: Object;
@@ -17,4 +15,11 @@ export abstract class EventSubscription {
         this.version = version;
         this.callback = callback;
     }
+
+    public triggerRandomEvent(): void {
+        const randomData = this.generateRandomData();
+        this.callback(randomData);
+    }
+
+    protected abstract generateRandomData(): any;
 }

@@ -4,7 +4,7 @@ import { CommunityEvent } from "./CommunityEvent";
 import { PollEndData } from "./Subscriptions/PollEndSubscription";
 
 export class Poll extends CommunityEvent {
-    private choices: Choice[];
+    private choices: Choice[] = [];
 
     constructor(livestream: LiveStream, data: PollEndData) {
         super({
@@ -36,6 +36,7 @@ export class Poll extends CommunityEvent {
     }
 
     public async semantize(context?: Resource): Promise<void> {
+        if (!this.triggeredDuring) return;
         super.semantize(context);
         for (const choice of this.choices) {
             choice.semantize(context);

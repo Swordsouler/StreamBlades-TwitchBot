@@ -5,7 +5,7 @@ import { CommunityEvent } from "./CommunityEvent";
 import { PredictionEndData } from "./Subscriptions/PredictionEndSubscription";
 
 export class Prediction extends CommunityEvent {
-    private outcomes: Outcome[];
+    private outcomes: Outcome[] = [];
 
     constructor(livestream: LiveStream, data: PredictionEndData) {
         super({
@@ -42,6 +42,7 @@ export class Prediction extends CommunityEvent {
     }
 
     public async semantize(context?: Resource): Promise<void> {
+        if (!this.triggeredDuring) return;
         super.semantize(context);
         for (const outcome of this.outcomes) {
             outcome.semantize(context);

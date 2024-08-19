@@ -120,77 +120,66 @@ export class Streamer extends User {
         await this.tes.unsubscribe(subscription);
     }
 
-    private subscribeToAllEvents() {
-        this.subscribe(
-            new StreamOnlineSubscription(this.userId, (data) => {
-                this.livestream = new LiveStream(
-                    this,
-                    data.id,
-                    new Date(data.started_at)
-                );
-                this.livestream.semantize(this.resource);
-            })
-        );
-        this.subscribe(
-            new StreamOfflineSubscription(this.userId, (data) => {
-                this.livestream.finishStream();
-                this.livestream.semantize(this.resource);
-                this.livestream = null;
-            })
-        );
-
-        this.subscribe(
-            new SubscribeSubscription(this.userId, (data) => {
-                new Subscribe(this.livestream, data).semantize(this.resource);
-            })
-        );
-        this.subscribe(
-            new SubscriptionGiftSubscription(this.userId, (data) => {
+    private eventsSubscriptions: Record<string, EventSubscription> = {
+        "stream.online": new StreamOnlineSubscription(this.userId, (data) => {
+            this.livestream = new LiveStream(
+                this,
+                data.id,
+                new Date(data.started_at)
+            );
+            this.livestream.semantize(this.resource);
+        }),
+        "stream.offline": new StreamOfflineSubscription(this.userId, (data) => {
+            this.livestream.finishStream();
+            this.livestream.semantize(this.resource);
+            this.livestream = null;
+        }),
+        "channel.subscribe": new SubscribeSubscription(this.userId, (data) => {
+            new Subscribe(this.livestream, data).semantize(this.resource);
+        }),
+        "channel.subscription.gift": new SubscriptionGiftSubscription(
+            this.userId,
+            (data) => {
                 new SubscriptionGift(this.livestream, data).semantize(
                     this.resource
                 );
-            })
-        );
-        this.subscribe(
-            new SubscriptionMessageSubscription(this.userId, (data) => {
+            }
+        ),
+        "channel.subscription.message": new SubscriptionMessageSubscription(
+            this.userId,
+            (data) => {
                 new SubscriptionMessage(this.livestream, data).semantize(
                     this.resource
                 );
-            })
-        );
-        this.subscribe(
-            new HypeTrainEndSubscription(this.userId, (data) => {
+            }
+        ),
+        "channel.hype_train.end": new HypeTrainEndSubscription(
+            this.userId,
+            (data) => {
                 new HypeTrain(this.livestream, data).semantize(this.resource);
-            })
-        );
-        this.subscribe(
-            new PollEndSubscription(this.userId, (data) => {
-                new Poll(this.livestream, data).semantize(this.resource);
-            })
-        );
-        this.subscribe(
-            new PredictionEndSubscription(this.userId, (data) => {
+            }
+        ),
+        "channel.poll.end": new PollEndSubscription(this.userId, (data) => {
+            new Poll(this.livestream, data).semantize(this.resource);
+        }),
+        "channel.prediction.end": new PredictionEndSubscription(
+            this.userId,
+            (data) => {
                 new Prediction(this.livestream, data).semantize(this.resource);
-            })
-        );
-        this.subscribe(
-            new MessageSubscription(this.userId, (data) => {
-                new Message(this.livestream, data, this.bttv).semantize(
-                    this.resource
-                );
-            })
-        );
-        this.subscribe(
-            new CheerSubscription(this.userId, (data) => {
-                new Cheer(this.livestream, data).semantize(this.resource);
-            })
-        );
-        this.subscribe(
-            new RaidSubscription(this.userId, (data) => {
-                new Raid(this.livestream, data).semantize(this.resource);
-            })
-        );
-        this.subscribe(
+            }
+        ),
+        "channel.chat.message": new MessageSubscription(this.userId, (data) => {
+            new Message(this.livestream, data, this.bttv).semantize(
+                this.resource
+            );
+        }),
+        "channel.cheer": new CheerSubscription(this.userId, (data) => {
+            new Cheer(this.livestream, data).semantize(this.resource);
+        }),
+        "channel.raid": new RaidSubscription(this.userId, (data) => {
+            new Raid(this.livestream, data).semantize(this.resource);
+        }),
+        "channel.channel_points_custom_reward_redemption.add":
             new ChannelPointsCustomRewardRedemptionAddSubscription(
                 this.userId,
                 (data) => {
@@ -199,17 +188,37 @@ export class Streamer extends User {
                         data
                     ).semantize(this.resource);
                 }
+            ),
+        "channel.follow": new FollowSubscription(this.userId, (data) => {
+            new Follow(this.livestream, data).semantize(this.resource);
+        }),
+        "channel.ban": new BanSubscription(this.userId, (data) => {
+            new Ban(this.livestream, data).semantize(this.resource);
+        }),
+    };
+    private subscribeToAllEvents() {
+        for (const event in this.eventsSubscriptions) {
+            this.subscribe(this.eventsSubscriptions[event]);
+        }
+
+        setInterval(() => {
+            // trigger a random event
+            const events = Object.keys(this.eventsSubscriptions);
+            const randomEvent =
+                events[Math.floor(Math.random() * events.length)];
+            // if not stream.online or stream.offline
+            if (
+                randomEvent !== "stream.online" &&
+                randomEvent !== "stream.offline"
             )
-        );
-        this.subscribe(
-            new FollowSubscription(this.userId, (data) => {
-                new Follow(this.livestream, data).semantize(this.resource);
-            })
-        );
-        this.subscribe(
-            new BanSubscription(this.userId, (data) => {
-                new Ban(this.livestream, data).semantize(this.resource);
-            })
-        );
+                this.eventsSubscriptions[randomEvent].triggerRandomEvent();
+        }, 1000);
+
+        setTimeout(() => {
+            this.eventsSubscriptions["stream.online"].triggerRandomEvent();
+        }, 10000);
+        setTimeout(() => {
+            this.eventsSubscriptions["stream.offline"].triggerRandomEvent();
+        }, 60000);
     }
 }

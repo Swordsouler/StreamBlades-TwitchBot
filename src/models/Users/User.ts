@@ -11,6 +11,10 @@ export class User extends RDFBase {
     private refreshTimeout: NodeJS.Timeout;
 
     constructor(userId: string, displayName?: string, refreshToken?: string) {
+        if (!userId) {
+            userId = "anonymous_user";
+            displayName = "Anonymous";
+        }
         super(new Resource("twitch_" + userId));
         this.userId = userId;
         this.displayName = displayName;

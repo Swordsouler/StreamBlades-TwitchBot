@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { EventSubscription } from "./EventSubscription";
 
 export type HypeTrainEndData = {
@@ -31,5 +32,31 @@ export class HypeTrainEndSubscription extends EventSubscription {
             "1",
             callback
         );
+    }
+
+    protected generateRandomData(): HypeTrainEndData {
+        const broadcaster_username = faker.internet.userName();
+        return {
+            id: faker.string.uuid(),
+            broadcaster_user_id: faker.string.uuid(),
+            broadcaster_user_login: broadcaster_username.toLowerCase(),
+            broadcaster_user_name: broadcaster_username,
+            level: faker.number.int({ min: 1, max: 5 }),
+            total: faker.number.int({ min: 1000, max: 100000 }),
+            top_contributions: Array.from({ length: 3 }, () => ({
+                user_id: faker.string.uuid(),
+                user_login: faker.internet.userName().toLowerCase(),
+                user_name: faker.internet.userName(),
+                type: faker.helpers.arrayElement([
+                    "bits",
+                    "subscription",
+                    "other",
+                ]),
+                total: faker.number.int({ min: 100, max: 10000 }),
+            })),
+            started_at: faker.date.recent().toISOString(),
+            ended_at: faker.date.recent().toISOString(),
+            cooldown_ends_at: faker.date.recent().toISOString(),
+        };
     }
 }

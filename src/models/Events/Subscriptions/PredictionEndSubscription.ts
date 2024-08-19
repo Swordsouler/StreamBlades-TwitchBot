@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { EventSubscription } from "./EventSubscription";
 
 export type PredictionEndData = {
@@ -38,5 +39,46 @@ export class PredictionEndSubscription extends EventSubscription {
             "1",
             callback
         );
+    }
+
+    protected generateRandomData(): PredictionEndData {
+        const broadcaster_username = faker.internet.userName();
+        return {
+            id: faker.string.uuid(),
+            broadcaster_user_id: faker.string.uuid(),
+            broadcaster_user_login: broadcaster_username.toLowerCase(),
+            broadcaster_user_name: broadcaster_username,
+            title: faker.lorem.sentence(),
+            winning_outcome_id: faker.string.uuid(),
+            outcomes: Array.from(
+                { length: faker.number.int({ min: 2, max: 5 }) },
+                () => ({
+                    id: faker.string.uuid(),
+                    title: faker.lorem.word(),
+                    color: faker.internet.color(),
+                    users: faker.number.int({ min: 0, max: 1000 }),
+                    channel_points: faker.number.int({ min: 0, max: 100000 }),
+                    top_predictors: Array.from(
+                        { length: faker.number.int({ min: 0, max: 10 }) },
+                        () => ({
+                            user_id: faker.string.uuid(),
+                            user_login: faker.internet.userName().toLowerCase(),
+                            user_name: faker.internet.userName(),
+                            channel_points_won: faker.number.int({
+                                min: 0,
+                                max: 10000,
+                            }),
+                            channel_points_used: faker.number.int({
+                                min: 0,
+                                max: 10000,
+                            }),
+                        })
+                    ),
+                })
+            ),
+            status: faker.helpers.arrayElement(["resolved", "canceled"]),
+            started_at: faker.date.recent().toISOString(),
+            ended_at: faker.date.recent().toISOString(),
+        };
     }
 }

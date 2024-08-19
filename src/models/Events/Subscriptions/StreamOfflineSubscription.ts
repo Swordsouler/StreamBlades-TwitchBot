@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { EventSubscription } from "./EventSubscription";
 
 export type StreamOfflineData = {
@@ -18,5 +19,14 @@ export class StreamOfflineSubscription extends EventSubscription {
             "1",
             callback
         );
+    }
+
+    protected generateRandomData(): StreamOfflineData {
+        const broadcaster_username = faker.internet.userName();
+        return {
+            broadcaster_user_id: faker.string.uuid(),
+            broadcaster_user_login: broadcaster_username.toLowerCase(),
+            broadcaster_user_name: broadcaster_username,
+        };
     }
 }

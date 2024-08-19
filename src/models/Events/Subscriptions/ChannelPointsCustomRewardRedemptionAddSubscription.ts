@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { EventSubscription } from "./EventSubscription";
 
 export type ChannelPointsCustomRewardRedemptionAddData = {
@@ -31,5 +32,28 @@ export class ChannelPointsCustomRewardRedemptionAddSubscription extends EventSub
             "1",
             callback
         );
+    }
+
+    protected generateRandomData(): ChannelPointsCustomRewardRedemptionAddData {
+        const user_username = faker.internet.userName();
+        const broadcaster_username = faker.internet.userName();
+        return {
+            id: faker.string.uuid(),
+            broadcaster_user_id: faker.string.uuid(),
+            broadcaster_user_login: broadcaster_username.toLowerCase(),
+            broadcaster_user_name: broadcaster_username,
+            user_id: faker.string.uuid(),
+            user_login: user_username.toLowerCase(),
+            user_name: user_username,
+            user_input: faker.lorem.sentence(),
+            status: "unfulfilled",
+            reward: {
+                id: faker.string.uuid(),
+                title: faker.lorem.words(),
+                cost: faker.number.int(),
+                prompt: faker.lorem.sentence(),
+            },
+            redeemed_at: faker.date.recent().toISOString(),
+        };
     }
 }

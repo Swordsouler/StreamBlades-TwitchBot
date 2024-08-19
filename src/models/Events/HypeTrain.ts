@@ -8,7 +8,7 @@ export class HypeTrain extends CommunityEvent {
     topContributions: {
         contributor: Viewer;
         contribution: RDFBase;
-    }[];
+    }[] = [];
 
     constructor(livestream: LiveStream, data: HypeTrainEndData) {
         super({
@@ -54,6 +54,7 @@ export class HypeTrain extends CommunityEvent {
     }
 
     public async semantize(context?: Resource): Promise<void> {
+        if (!this.triggeredDuring) return;
         super.semantize(context);
         for (const { contributor, contribution } of this.topContributions) {
             contributor.semantize();

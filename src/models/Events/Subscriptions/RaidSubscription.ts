@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { EventSubscription } from "./EventSubscription";
 
 export type RaidData = {
@@ -19,5 +20,20 @@ export class RaidSubscription extends EventSubscription {
             "1",
             callback
         );
+    }
+
+    protected generateRandomData(): RaidData {
+        const from_broadcaster_username = faker.internet.userName();
+        const to_broadcaster_username = faker.internet.userName();
+        return {
+            from_broadcaster_user_id: faker.string.uuid(),
+            from_broadcaster_user_login:
+                from_broadcaster_username.toLowerCase(),
+            from_broadcaster_user_name: from_broadcaster_username,
+            to_broadcaster_user_id: faker.string.uuid(),
+            to_broadcaster_user_login: to_broadcaster_username.toLowerCase(),
+            to_broadcaster_user_name: to_broadcaster_username,
+            viewers: faker.number.int({ min: 1, max: 10000 }),
+        };
     }
 }

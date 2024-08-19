@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { EventSubscription } from "./EventSubscription";
 
 export type StreamOnlineData = {
@@ -21,5 +22,23 @@ export class StreamOnlineSubscription extends EventSubscription {
             "1",
             callback
         );
+    }
+
+    protected generateRandomData(): StreamOnlineData {
+        const broadcasterUsername = faker.internet.userName();
+        return {
+            id: faker.string.uuid(),
+            broadcaster_user_id: faker.string.uuid(),
+            broadcaster_user_login: broadcasterUsername.toLowerCase(),
+            broadcaster_user_name: broadcasterUsername,
+            type: faker.helpers.arrayElement([
+                "live",
+                "playlist",
+                "watch_party",
+                "premiere",
+                "rerun",
+            ]),
+            started_at: faker.date.recent().toISOString(),
+        };
     }
 }

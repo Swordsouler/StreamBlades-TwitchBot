@@ -41,6 +41,7 @@ export class Ban extends ViewerEvent {
     }
 
     public async semantize(context?: Resource): Promise<void> {
+        if (!this.triggeredDuring) return;
         super.semantize(context);
         this.bannedBy.semantize();
     }
