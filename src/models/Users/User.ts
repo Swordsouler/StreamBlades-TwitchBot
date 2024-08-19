@@ -20,7 +20,7 @@ export class User extends RDFBase {
         this.displayName = displayName;
         if (this.displayName)
             this.addProperty(
-                "hasDisplayName",
+                new Resource("hasDisplayName"),
                 new XSDData(this.displayName, "string")
             );
         this.refreshToken = refreshToken;

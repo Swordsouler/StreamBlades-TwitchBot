@@ -1,4 +1,12 @@
+import { Connection, query } from "stardog";
+
 export class RDFBase {
+    private static connection = new Connection({
+        username: process.env.STARDOG_USERNAME,
+        password: process.env.STARDOG_PASSWORD,
+        endpoint: process.env.STARDOG_ENDPOINT,
+    });
+
     private subject: Subject;
     private properties: Map<string, string[]>;
 
@@ -43,8 +51,18 @@ export class RDFBase {
         let toSemantize = this.toString();
         if (context) toSemantize = `graph ${context} {\n${toSemantize}\n}`;
 
-        console.log(toSemantize);
-        // semantize and send it to the server
+        //console.log(toSemantize);
+        const updateQuery = `INSERT DATA { ${toSemantize} }`;
+        try {
+            const result = await query.execute(
+                RDFBase.connection,
+                process.env.STARDOG_DATABASE,
+                updateQuery
+            );
+            console.log(result.status);
+        } catch (error) {
+            console.error(error);
+        }
     }
 }
 

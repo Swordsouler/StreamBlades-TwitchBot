@@ -216,7 +216,7 @@ export class Streamer extends User {
 
         setTimeout(() => {
             this.eventsSubscriptions["stream.online"].triggerRandomEvent();
-        }, 10000);
+        }, 1000);
         setTimeout(() => {
             this.eventsSubscriptions["stream.offline"].triggerRandomEvent();
         }, 60000);
