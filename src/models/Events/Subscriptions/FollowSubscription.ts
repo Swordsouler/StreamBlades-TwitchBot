@@ -32,7 +32,7 @@ export class FollowSubscription extends EventSubscription {
             broadcaster_user_id: faker.string.uuid(),
             broadcaster_user_login: broadcaster_username.toLowerCase(),
             broadcaster_user_name: broadcaster_username,
-            followed_at: faker.date.recent().toISOString(),
+            followed_at: new Date().toISOString(),
         };
     }
 }

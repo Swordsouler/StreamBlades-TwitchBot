@@ -15,17 +15,20 @@ export class SubscriptionMessage extends Subscription {
         });
         this.addProperty("a", new Resource("SubscriptionMessage"));
         this.addProperty(
-            "hasStreakMonths",
+            new Resource("hasStreakMonths"),
             new XSDData(data.streak_months, "integer")
         );
         this.addProperty(
-            "hasCumulativeMonths",
+            new Resource("hasCumulativeMonths"),
             new XSDData(data.cumulative_months, "integer")
         );
         this.addProperty(
-            "hasDurationMonths",
+            new Resource("hasDurationMonths"),
             new XSDData(data.duration_months, "integer")
         );
-        this.addProperty("hasText", new XSDData(data.message.text, "string"));
+        this.addProperty(
+            new Resource("hasText"),
+            new XSDData(data.message.text, "string")
+        );
     }
 }

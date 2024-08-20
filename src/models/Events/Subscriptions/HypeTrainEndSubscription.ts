@@ -54,8 +54,8 @@ export class HypeTrainEndSubscription extends EventSubscription {
                 ]),
                 total: faker.number.int({ min: 100, max: 10000 }),
             })),
-            started_at: faker.date.recent().toISOString(),
-            ended_at: faker.date.recent().toISOString(),
+            started_at: faker.date.past().toISOString(),
+            ended_at: new Date().toISOString(),
             cooldown_ends_at: faker.date.recent().toISOString(),
         };
     }

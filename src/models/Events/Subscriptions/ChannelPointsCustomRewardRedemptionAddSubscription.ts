@@ -53,7 +53,7 @@ export class ChannelPointsCustomRewardRedemptionAddSubscription extends EventSub
                 cost: faker.number.int(),
                 prompt: faker.lorem.sentence(),
             },
-            redeemed_at: faker.date.recent().toISOString(),
+            redeemed_at: new Date().toISOString(),
         };
     }
 }

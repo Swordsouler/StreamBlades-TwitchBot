@@ -38,7 +38,7 @@ export class StreamOnlineSubscription extends EventSubscription {
                 "premiere",
                 "rerun",
             ]),
-            started_at: faker.date.recent().toISOString(),
+            started_at: new Date().toISOString(),
         };
     }
 }

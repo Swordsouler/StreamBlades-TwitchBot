@@ -1,3 +1,4 @@
+import { error } from "console";
 import { Connection, query } from "stardog";
 
 export class RDFBase {
@@ -59,7 +60,7 @@ export class RDFBase {
                 process.env.STARDOG_DATABASE,
                 updateQuery
             );
-            console.log(result.status);
+            console.log(result.status, new Date().toISOString());
         } catch (error) {
             console.error(error);
         }

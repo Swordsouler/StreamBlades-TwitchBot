@@ -43,7 +43,7 @@ export class BanSubscription extends EventSubscription {
             moderator_user_login: moderator_username.toLowerCase(),
             moderator_user_name: moderator_username,
             reason: faker.lorem.sentence(),
-            banned_at: faker.date.past().toISOString(),
+            banned_at: new Date().toISOString(),
             ends_at: faker.date.future().toISOString(),
             is_permanent: faker.datatype.boolean(),
         };

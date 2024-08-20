@@ -72,8 +72,8 @@ export class PollEndSubscription extends EventSubscription {
                 "archived",
                 "terminated",
             ]),
-            started_at: faker.date.recent().toISOString(),
-            ended_at: faker.date.recent().toISOString(),
+            started_at: faker.date.past().toISOString(),
+            ended_at: new Date().toISOString(),
         };
     }
 }

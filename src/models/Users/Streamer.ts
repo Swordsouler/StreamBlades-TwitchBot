@@ -101,7 +101,10 @@ export class Streamer extends User {
         }
     }
 
-    public async subscribe(event: EventSubscription): Promise<any> {
+    public async subscribe(
+        event: EventSubscription,
+        retry: boolean = true
+    ): Promise<any> {
         try {
             const sub = await this.tes.subscribe(
                 event.type,
@@ -113,6 +116,11 @@ export class Streamer extends User {
             return sub;
         } catch (e) {
             console.error(event.type, e);
+            if (retry)
+                setTimeout(async () => {
+                    console.log("Retrying to subscribe to " + event.type);
+                    await this.subscribe(event, false);
+                }, 5000);
         }
     }
 
@@ -212,13 +220,11 @@ export class Streamer extends User {
                 randomEvent !== "stream.offline"
             )
                 this.eventsSubscriptions[randomEvent].triggerRandomEvent();
-        }, 1000);
+        }, 100);
 
-        setTimeout(() => {
-            this.eventsSubscriptions["stream.online"].triggerRandomEvent();
-        }, 1000);
+        this.eventsSubscriptions["stream.online"].triggerRandomEvent();
         setTimeout(() => {
             this.eventsSubscriptions["stream.offline"].triggerRandomEvent();
-        }, 60000);
+        }, 60000 * 30);
     }
 }
