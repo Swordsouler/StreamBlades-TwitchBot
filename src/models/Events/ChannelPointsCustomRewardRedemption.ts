@@ -44,13 +44,13 @@ export class ChannelPointsCustomRewardRedemption extends ViewerEvent {
     public async semantize(context?: Resource): Promise<void> {
         if (!this.triggeredDuring) return;
         super.semantize(context);
-        this.reward.semantize();
+        this.reward.semantize(context);
     }
 }
 
 export class ChannelPointsReward extends RDFBase {
     constructor(id: string, title: string, cost: number, prompt: string) {
-        super(new Resource(id));
+        super(new Resource("reward_" + id));
         this.addProperty("a", new Resource("ChannelPointsReward"));
         this.addProperty(
             new Resource("hasTitle"),
@@ -61,9 +61,5 @@ export class ChannelPointsReward extends RDFBase {
             new Resource("hasPrompt"),
             new XSDData(prompt, "string")
         );
-    }
-
-    public async semantize(context?: Resource): Promise<void> {
-        super.semantize();
     }
 }

@@ -10,7 +10,7 @@ export type ChannelPointsCustomRewardRedemptionAddData = {
     user_login: string;
     user_name: string;
     user_input: string;
-    status: string;
+    status: "unfulfilled" | "unknown" | "fulfilled" | "canceled";
     reward: {
         id: string;
         title: string;
@@ -46,7 +46,12 @@ export class ChannelPointsCustomRewardRedemptionAddSubscription extends EventSub
             user_login: user_username.toLowerCase(),
             user_name: user_username,
             user_input: faker.lorem.sentence(),
-            status: "unfulfilled",
+            status: faker.helpers.arrayElement([
+                "unfulfilled",
+                "unknown",
+                "fulfilled",
+                "canceled",
+            ]),
             reward: {
                 id: faker.string.uuid(),
                 title: faker.lorem.words(),

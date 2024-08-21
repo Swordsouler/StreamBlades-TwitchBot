@@ -54,7 +54,7 @@ export class Outcome extends RDFBase {
     private topPredictions: {
         predictor: Viewer;
         prediction: RDFBase;
-    }[];
+    }[] = [];
 
     constructor(
         id: string,
@@ -95,7 +95,6 @@ export class Outcome extends RDFBase {
                     predictor.resource
                 )
             );
-            prediction.addProperty("a", new Resource("Prediction"));
             prediction.addProperty(
                 new Resource("hasChannelPointsWon"),
                 new XSDData(topPredictor.channel_points_won, "integer")
@@ -104,6 +103,18 @@ export class Outcome extends RDFBase {
                 new Resource("hasChannelPointsUsed"),
                 new XSDData(topPredictor.channel_points_used, "integer")
             );
+            this.topPredictions.push({
+                predictor: predictor,
+                prediction: prediction,
+            });
+        }
+    }
+
+    public async semantize(context?: Resource): Promise<void> {
+        super.semantize(context);
+        for (const topPrediction of this.topPredictions) {
+            topPrediction.predictor.semantize(context);
+            topPrediction.prediction.semantize(context);
         }
     }
 }
