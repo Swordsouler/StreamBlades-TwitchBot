@@ -27,11 +27,7 @@ export class ChannelPointsCustomRewardRedemption extends ViewerEvent {
         );
         this.addProperty(
             new Resource("hasUserInput"),
-            new Resource(data.reward.id)
-        );
-        this.addProperty(
-            new Resource("hasReward"),
-            new Resource(data.reward.id)
+            new XSDData(data.user_input, "string")
         );
         this.reward = new ChannelPointsReward(
             data.reward.id,
@@ -39,6 +35,7 @@ export class ChannelPointsCustomRewardRedemption extends ViewerEvent {
             data.reward.cost,
             data.reward.prompt
         );
+        this.addProperty(new Resource("hasReward"), this.reward.resource);
     }
 
     public async semantize(context?: Resource): Promise<void> {
