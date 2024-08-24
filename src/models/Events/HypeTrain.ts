@@ -37,7 +37,6 @@ export class HypeTrain extends CommunityEvent {
                     topContributor.resource
                 )
             );
-            topContribution.addProperty("a", new Resource("TopContribution"));
             topContribution.addProperty(
                 new Resource("hasType"),
                 new XSDData(contribution.type, "string")
