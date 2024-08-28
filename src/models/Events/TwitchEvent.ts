@@ -23,8 +23,8 @@ export abstract class TwitchEvent extends RDFBase {
         }
     }
 
-    public semantize(context?: Resource): Promise<void> {
+    public semantize(context?: Resource, description?: string): Promise<void> {
         if (!this.triggeredDuring) return;
-        return super.semantize(context);
+        return super.semantize(context, description);
     }
 }

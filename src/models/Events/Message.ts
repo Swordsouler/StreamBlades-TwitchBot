@@ -66,9 +66,12 @@ export class Message extends ViewerEvent {
         }
     }
 
-    public async semantize(context?: Resource): Promise<void> {
+    public async semantize(
+        context?: Resource,
+        description?: string
+    ): Promise<void> {
         if (!this.triggeredDuring) return;
-        super.semantize(context);
+        super.semantize(context, description);
         for (const emote of Object.values(this.emotes)) emote.semantize();
         for (const { badge, hasBadge } of this.badges) {
             badge.semantize();
@@ -78,12 +81,14 @@ export class Message extends ViewerEvent {
 }
 
 export class Badge extends RDFBase {
+    private set_id: string;
     constructor(set_id: string) {
         super(new Resource("badge_" + set_id));
         this.addProperty("a", new Resource("Badge"));
+        this.set_id = set_id;
     }
 
     public async semantize(context?: Resource): Promise<void> {
-        super.semantize();
+        super.semantize(undefined, `Badge ${this.set_id}`);
     }
 }

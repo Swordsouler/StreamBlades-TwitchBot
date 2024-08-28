@@ -21,9 +21,15 @@ export abstract class ViewerEvent extends TwitchEvent {
         );
     }
 
-    public async semantize(context?: Resource): Promise<void> {
+    public toString(): string {
+        return `${super.toString()}\n${this.triggeredBy.toString()}`;
+    }
+
+    public async semantize(
+        context?: Resource,
+        description?: string
+    ): Promise<void> {
         if (!this.triggeredDuring) return;
-        super.semantize(context);
-        this.triggeredBy.semantize();
+        super.semantize(context, description);
     }
 }

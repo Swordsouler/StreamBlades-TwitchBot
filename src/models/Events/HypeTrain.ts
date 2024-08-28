@@ -52,9 +52,12 @@ export class HypeTrain extends CommunityEvent {
         }
     }
 
-    public async semantize(context?: Resource): Promise<void> {
+    public async semantize(
+        context?: Resource,
+        description?: string
+    ): Promise<void> {
         if (!this.triggeredDuring) return;
-        super.semantize(context);
+        super.semantize(context, description);
         for (const { contributor, contribution } of this.topContributions) {
             contributor.semantize();
             contribution.semantize(context);

@@ -1,37 +1,39 @@
 import "dotenv/config";
+import { StreamerManager } from "./models/StreamerManager";
 import { Streamer } from "./models/Users/Streamer";
-import { StreamBlades } from "./models/Users/ChatBot";
-/*
-import { RDFBase, Resource, Triple, XSDData } from "./models/RDFBase";
+var cron = require("node-cron");
 
+const streamerManager = new StreamerManager();
 
-const RDF = new RDFBase(new Resource("10791592"));
-RDF.addProperty(new Resource("hasBadge"), new Resource("Moderator"));
-RDF.addProperty(new Resource("hasBadge"), new Resource("Streamer"));
-RDF.addProperty(new Resource("hasBadge"), new Resource("VS"));
-RDF.addProperty(new Resource("hasName"), new XSDData("Swordsouler", "string"));
-
-const RDF2 = new RDFBase(new Triple("10791592", "hasBadge", "VS"));
-RDF2.addProperty(
-    new Resource("hasTime"),
-    new XSDData("2021-09-01T00:00:00Z", "dateTime")
-);
-RDF2.addProperty(
-    new Resource("hasTime"),
-    new XSDData("2021-09-01T00:00:00Z", "dateTime")
-);*/
-
-/*console.log(RDF.toString());
-console.log(RDF2.toString());*/
-
-const Swordsouler = new Streamer(
+/*const Swordsouler = new Streamer(
     "107968853",
     "",
     "0do9olkmornqn8fjxlfdz66ri7vgad38rd49ejq5yrczw90ab1"
-);
-
-/*const CrocodyleTV = new Streamer(
-    "101234264",
-    "",
-    "l7mat2qhfh0r588svs7xya1f530hr78qbtg463h90ofz45miax"
 );*/
+
+//deleteDuplicateDisplayName();
+const deleteDuplicateDisplayName = async () => {
+    try {
+        await fetch(process.env.DELETE_DUPLICATE_DISPLAY_NAME_URL, {
+            method: "POST",
+        });
+        console.log("deleteDuplicateDisplayName: OK");
+    } catch (error) {
+        console.error("deleteDuplicateDisplayName: " + error.status);
+    }
+};
+
+// Cron job to delete duplicate display names every hour
+cron.schedule("0 * * * *", () => {
+    deleteDuplicateDisplayName();
+});
+
+const originalConsoleLog = console.log;
+console.log = function (...args: any[]) {
+    let date = new Date();
+    let timestamp =
+        date.toLocaleDateString([], { day: "2-digit", month: "2-digit" }) +
+        " " +
+        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    originalConsoleLog.apply(console, [`[${timestamp}]`, ...args]);
+};

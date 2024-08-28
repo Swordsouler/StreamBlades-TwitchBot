@@ -48,7 +48,10 @@ export class RDFBase {
             .join(" ;\n\t")} .`;
     }
 
-    public async semantize(context?: Resource): Promise<void> {
+    public async semantize(
+        context?: Resource,
+        description?: string
+    ): Promise<void> {
         let toSemantize = this.toString();
         if (context) toSemantize = `graph ${context} {\n${toSemantize}\n}`;
 
@@ -60,9 +63,10 @@ export class RDFBase {
                 process.env.STARDOG_DATABASE,
                 updateQuery
             );
-            console.log(result.status, new Date().toISOString());
+            if (result.status !== 200) throw result;
+            console.log(result.status, description);
         } catch (error) {
-            console.error(error);
+            console.error(error, description);
         }
     }
 }

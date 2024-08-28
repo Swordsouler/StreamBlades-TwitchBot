@@ -2,6 +2,8 @@ import { RDFBase, Resource, XSDData } from "./RDFBase";
 import { Streamer } from "./Users/Streamer";
 
 export class LiveStream extends RDFBase {
+    private broadcaster: Streamer;
+
     constructor(
         broadcaster: Streamer,
         livestreamId: string,
@@ -14,6 +16,7 @@ export class LiveStream extends RDFBase {
             new XSDData(hasStartedAt.toISOString(), "dateTime")
         );
         this.addProperty(new Resource("broadcastedBy"), broadcaster.resource);
+        this.broadcaster = broadcaster;
     }
 
     public finishStream(): void {

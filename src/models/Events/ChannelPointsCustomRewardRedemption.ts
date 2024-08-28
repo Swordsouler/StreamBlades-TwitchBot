@@ -38,9 +38,12 @@ export class ChannelPointsCustomRewardRedemption extends ViewerEvent {
         this.addProperty(new Resource("hasReward"), this.reward.resource);
     }
 
-    public async semantize(context?: Resource): Promise<void> {
+    public async semantize(
+        context?: Resource,
+        description?: string
+    ): Promise<void> {
         if (!this.triggeredDuring) return;
-        super.semantize(context);
+        super.semantize(context, description);
         this.reward.semantize(context);
     }
 }

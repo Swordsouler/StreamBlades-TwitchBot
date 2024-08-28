@@ -35,9 +35,12 @@ export class Poll extends CommunityEvent {
         }
     }
 
-    public async semantize(context?: Resource): Promise<void> {
+    public async semantize(
+        context?: Resource,
+        description?: string
+    ): Promise<void> {
         if (!this.triggeredDuring) return;
-        super.semantize(context);
+        super.semantize(context, description);
         for (const choice of this.choices) {
             choice.semantize(context);
         }

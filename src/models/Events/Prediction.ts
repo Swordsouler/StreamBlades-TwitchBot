@@ -41,9 +41,12 @@ export class Prediction extends CommunityEvent {
         }
     }
 
-    public async semantize(context?: Resource): Promise<void> {
+    public async semantize(
+        context?: Resource,
+        description?: string
+    ): Promise<void> {
         if (!this.triggeredDuring) return;
-        super.semantize(context);
+        super.semantize(context, description);
         for (const outcome of this.outcomes) {
             outcome.semantize(context);
         }

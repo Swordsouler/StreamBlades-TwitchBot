@@ -50,22 +50,30 @@ export class Streamer extends User {
     }
 
     public async connect() {
-        const TES = require("tesjs");
-        this.tes = new TES({
-            identity: {
-                id: process.env.TWITCH_CLIENT_ID,
-                secret: process.env.TWITCH_CLIENT_SECRET,
-                accessToken: this.accessToken,
-                refreshToken: this.refreshToken,
-                onAuthenticationFailure: async () => {
-                    const accessToken = await this.refreshAccessToken();
-                    return accessToken;
+        try {
+            const TES = require("tesjs");
+            this.tes = new TES({
+                identity: {
+                    id: process.env.TWITCH_CLIENT_ID,
+                    secret: process.env.TWITCH_CLIENT_SECRET,
+                    accessToken: this.accessToken,
+                    refreshToken: this.refreshToken,
+                    onAuthenticationFailure: async () => {
+                        const accessToken = await this.refreshAccessToken();
+                        return accessToken;
+                    },
                 },
-            },
-            listener: {
-                type: "websocket",
-            },
-        });
+                listener: {
+                    type: "websocket",
+                },
+                options: {
+                    debug: false,
+                    logging: false,
+                },
+            });
+        } catch (e) {
+            console.error(e);
+        }
 
         const subscriptions = await this.tes.getSubscriptions();
         for (const subscription of await subscriptions["data"]) {
@@ -115,8 +123,12 @@ export class Streamer extends User {
             console.log(`Subscribed to ${event.type} for ${this.displayName}`);
             return sub;
         } catch (e) {
-            console.error(event.type, e);
-            if (retry)
+            console.error(this.userId, `(${this.displayName})`, event.type, e);
+            if (
+                retry &&
+                e.message !==
+                    "403 Forbidden: subscription missing proper authorization"
+            )
                 setTimeout(async () => {
                     console.log("Retrying to subscribe to " + event.type);
                     await this.subscribe(event, false);
@@ -135,21 +147,31 @@ export class Streamer extends User {
                 data.id,
                 new Date(data.started_at)
             );
-            this.livestream.semantize(this.resource);
+            this.livestream.semantize(
+                this.resource,
+                `stream.online from ${data.broadcaster_user_name}`
+            );
         }),
         "stream.offline": new StreamOfflineSubscription(this.userId, (data) => {
             this.livestream.finishStream();
-            this.livestream.semantize(this.resource);
+            this.livestream.semantize(
+                this.resource,
+                `stream.offline from ${data.broadcaster_user_name}`
+            );
             this.livestream = null;
         }),
         "channel.subscribe": new SubscribeSubscription(this.userId, (data) => {
-            new Subscribe(this.livestream, data).semantize(this.resource);
+            new Subscribe(this.livestream, data).semantize(
+                this.resource,
+                `channel.subscribe from ${data.user_name} to ${data.broadcaster_user_name}}`
+            );
         }),
         "channel.subscription.gift": new SubscriptionGiftSubscription(
             this.userId,
             (data) => {
                 new SubscriptionGift(this.livestream, data).semantize(
-                    this.resource
+                    this.resource,
+                    `channel.subscription.gift ${data.total} gifts from ${data.user_name} to ${data.broadcaster_user_name}`
                 );
             }
         ),
@@ -157,35 +179,52 @@ export class Streamer extends User {
             this.userId,
             (data) => {
                 new SubscriptionMessage(this.livestream, data).semantize(
-                    this.resource
+                    this.resource,
+                    `channel.subscription.message from ${data.user_name} to ${data.broadcaster_user_name}}`
                 );
             }
         ),
         "channel.hype_train.end": new HypeTrainEndSubscription(
             this.userId,
             (data) => {
-                new HypeTrain(this.livestream, data).semantize(this.resource);
+                new HypeTrain(this.livestream, data).semantize(
+                    this.resource,
+                    `channel.hype_train.end ${data.level} levels from ${data.broadcaster_user_name}`
+                );
             }
         ),
         "channel.poll.end": new PollEndSubscription(this.userId, (data) => {
-            new Poll(this.livestream, data).semantize(this.resource);
+            new Poll(this.livestream, data).semantize(
+                this.resource,
+                `channel.poll.end from ${data.broadcaster_user_name}`
+            );
         }),
         "channel.prediction.end": new PredictionEndSubscription(
             this.userId,
             (data) => {
-                new Prediction(this.livestream, data).semantize(this.resource);
+                new Prediction(this.livestream, data).semantize(
+                    this.resource,
+                    `channel.prediction.end from ${data.broadcaster_user_name}`
+                );
             }
         ),
         "channel.chat.message": new MessageSubscription(this.userId, (data) => {
             new Message(this.livestream, data, this.bttv).semantize(
-                this.resource
+                this.resource,
+                `channel.chat.message from ${data.chatter_user_name} to ${data.broadcaster_user_name}`
             );
         }),
         "channel.cheer": new CheerSubscription(this.userId, (data) => {
-            new Cheer(this.livestream, data).semantize(this.resource);
+            new Cheer(this.livestream, data).semantize(
+                this.resource,
+                `channel.cheer ${data.bits} bits from ${data.user_name} to ${data.broadcaster_user_name}`
+            );
         }),
         "channel.raid": new RaidSubscription(this.userId, (data) => {
-            new Raid(this.livestream, data).semantize(this.resource);
+            new Raid(this.livestream, data).semantize(
+                this.resource,
+                `channel.raid ${data.viewers} viewers from ${data.from_broadcaster_user_name} to ${data.to_broadcaster_user_name}`
+            );
         }),
         "channel.channel_points_custom_reward_redemption.add":
             new ChannelPointsCustomRewardRedemptionAddSubscription(
@@ -194,7 +233,10 @@ export class Streamer extends User {
                     new ChannelPointsCustomRewardRedemption(
                         this.livestream,
                         data
-                    ).semantize(this.resource);
+                    ).semantize(
+                        this.resource,
+                        `channel.channel_points_custom_reward_redemption.add ${data.reward.title} from ${data.user_name} to ${data.broadcaster_user_name}`
+                    );
                 }
             ),
         "channel.follow": new FollowSubscription(this.userId, (data) => {
@@ -209,7 +251,7 @@ export class Streamer extends User {
             this.subscribe(this.eventsSubscriptions[event]);
         }
 
-        setInterval(() => {
+        /*setInterval(() => {
             // trigger a random event
             const events = Object.keys(this.eventsSubscriptions);
             const randomEvent =
@@ -220,8 +262,9 @@ export class Streamer extends User {
                 randomEvent !== "stream.offline"
             )
                 this.eventsSubscriptions[randomEvent].triggerRandomEvent();
-        }, 100);
+        }, 100);*/
 
+        if (this.userId !== "107968853") return;
         this.eventsSubscriptions["stream.online"].triggerRandomEvent();
         setTimeout(() => {
             this.eventsSubscriptions["stream.offline"].triggerRandomEvent();

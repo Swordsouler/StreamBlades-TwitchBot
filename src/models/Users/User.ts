@@ -113,6 +113,6 @@ export class User extends RDFBase {
     }
 
     public async semantize(context?: Resource): Promise<void> {
-        super.semantize();
+        super.semantize(undefined, `User ${this.displayName}`);
     }
 }
