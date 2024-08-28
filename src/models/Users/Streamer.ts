@@ -33,7 +33,7 @@ import { Ban } from "../Events/Ban";
 export class Streamer extends User {
     private tes: any;
     private bttv: BTTV;
-    private livestream: LiveStream;
+    public livestream: LiveStream;
 
     constructor(userId: string, displayName?: string, refreshToken?: string) {
         super(userId, displayName, refreshToken);
@@ -102,7 +102,7 @@ export class Streamer extends User {
                 data.data[0].id,
                 new Date(data.data[0].started_at)
             );
-            this.livestream.semantize(this.resource);
+            this.livestream.semantize(`stream.online from ${this.displayName}`);
         } else {
             console.log(`${this.displayName} is offline!`);
             this.livestream = null;
@@ -132,7 +132,7 @@ export class Streamer extends User {
                 setTimeout(async () => {
                     console.log("Retrying to subscribe to " + event.type);
                     await this.subscribe(event, false);
-                }, 5000);
+                }, 120000);
         }
     }
 
@@ -148,29 +148,25 @@ export class Streamer extends User {
                 new Date(data.started_at)
             );
             this.livestream.semantize(
-                this.resource,
                 `stream.online from ${data.broadcaster_user_name}`
             );
         }),
         "stream.offline": new StreamOfflineSubscription(this.userId, (data) => {
             this.livestream.finishStream();
             this.livestream.semantize(
-                this.resource,
                 `stream.offline from ${data.broadcaster_user_name}`
             );
             this.livestream = null;
         }),
         "channel.subscribe": new SubscribeSubscription(this.userId, (data) => {
-            new Subscribe(this.livestream, data).semantize(
-                this.resource,
+            new Subscribe(this, data).semantize(
                 `channel.subscribe from ${data.user_name} to ${data.broadcaster_user_name}}`
             );
         }),
         "channel.subscription.gift": new SubscriptionGiftSubscription(
             this.userId,
             (data) => {
-                new SubscriptionGift(this.livestream, data).semantize(
-                    this.resource,
+                new SubscriptionGift(this, data).semantize(
                     `channel.subscription.gift ${data.total} gifts from ${data.user_name} to ${data.broadcaster_user_name}`
                 );
             }
@@ -178,8 +174,7 @@ export class Streamer extends User {
         "channel.subscription.message": new SubscriptionMessageSubscription(
             this.userId,
             (data) => {
-                new SubscriptionMessage(this.livestream, data).semantize(
-                    this.resource,
+                new SubscriptionMessage(this, data).semantize(
                     `channel.subscription.message from ${data.user_name} to ${data.broadcaster_user_name}}`
                 );
             }
@@ -187,42 +182,36 @@ export class Streamer extends User {
         "channel.hype_train.end": new HypeTrainEndSubscription(
             this.userId,
             (data) => {
-                new HypeTrain(this.livestream, data).semantize(
-                    this.resource,
+                new HypeTrain(this, data).semantize(
                     `channel.hype_train.end ${data.level} levels from ${data.broadcaster_user_name}`
                 );
             }
         ),
         "channel.poll.end": new PollEndSubscription(this.userId, (data) => {
-            new Poll(this.livestream, data).semantize(
-                this.resource,
+            new Poll(this, data).semantize(
                 `channel.poll.end from ${data.broadcaster_user_name}`
             );
         }),
         "channel.prediction.end": new PredictionEndSubscription(
             this.userId,
             (data) => {
-                new Prediction(this.livestream, data).semantize(
-                    this.resource,
+                new Prediction(this, data).semantize(
                     `channel.prediction.end from ${data.broadcaster_user_name}`
                 );
             }
         ),
         "channel.chat.message": new MessageSubscription(this.userId, (data) => {
-            new Message(this.livestream, data, this.bttv).semantize(
-                this.resource,
+            new Message(this, data, this.bttv).semantize(
                 `channel.chat.message from ${data.chatter_user_name} to ${data.broadcaster_user_name}`
             );
         }),
         "channel.cheer": new CheerSubscription(this.userId, (data) => {
-            new Cheer(this.livestream, data).semantize(
-                this.resource,
+            new Cheer(this, data).semantize(
                 `channel.cheer ${data.bits} bits from ${data.user_name} to ${data.broadcaster_user_name}`
             );
         }),
         "channel.raid": new RaidSubscription(this.userId, (data) => {
-            new Raid(this.livestream, data).semantize(
-                this.resource,
+            new Raid(this, data).semantize(
                 `channel.raid ${data.viewers} viewers from ${data.from_broadcaster_user_name} to ${data.to_broadcaster_user_name}`
             );
         }),
@@ -231,21 +220,25 @@ export class Streamer extends User {
                 this.userId,
                 (data) => {
                     new ChannelPointsCustomRewardRedemption(
-                        this.livestream,
+                        this,
                         data
                     ).semantize(
-                        this.resource,
                         `channel.channel_points_custom_reward_redemption.add ${data.reward.title} from ${data.user_name} to ${data.broadcaster_user_name}`
                     );
                 }
             ),
         "channel.follow": new FollowSubscription(this.userId, (data) => {
-            new Follow(this.livestream, data).semantize(this.resource);
+            new Follow(this, data).semantize(
+                `channel.follow from ${data.user_name} to ${data.broadcaster_user_name}`
+            );
         }),
         "channel.ban": new BanSubscription(this.userId, (data) => {
-            new Ban(this.livestream, data).semantize(this.resource);
+            new Ban(this, data).semantize(
+                `channel.ban ${data.user_name} from ${data.moderator_user_name} on ${data.broadcaster_user_name}`
+            );
         }),
     };
+
     private subscribeToAllEvents() {
         for (const event in this.eventsSubscriptions) {
             this.subscribe(this.eventsSubscriptions[event]);
@@ -262,12 +255,12 @@ export class Streamer extends User {
                 randomEvent !== "stream.offline"
             )
                 this.eventsSubscriptions[randomEvent].triggerRandomEvent();
-        }, 100);*/
+        }, 1000);*/
 
         if (this.userId !== "107968853") return;
         this.eventsSubscriptions["stream.online"].triggerRandomEvent();
         setTimeout(() => {
             this.eventsSubscriptions["stream.offline"].triggerRandomEvent();
-        }, 60000);
+        }, 30000);
     }
 }

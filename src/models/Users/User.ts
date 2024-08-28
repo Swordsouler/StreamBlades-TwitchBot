@@ -106,13 +106,5 @@ export class User extends RDFBase {
         }
         const data = await response.json();
         this.displayName = data.data[0].display_name;
-        this.addProperty(
-            "hasDisplayName",
-            new XSDData(this.displayName, "string")
-        );
-    }
-
-    public async semantize(context?: Resource): Promise<void> {
-        super.semantize(undefined, `User ${this.displayName}`);
     }
 }

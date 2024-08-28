@@ -1,5 +1,5 @@
-import { LiveStream } from "../LiveStream";
 import { RDFBase, Resource, XSDData } from "../RDFBase";
+import { Streamer } from "../Users/Streamer";
 import { Viewer } from "../Users/Viewer";
 import { CommunityEvent } from "./CommunityEvent";
 import { HypeTrainEndData } from "./Subscriptions/HypeTrainEndSubscription";
@@ -10,12 +10,13 @@ export class HypeTrain extends CommunityEvent {
         contribution: RDFBase;
     }[] = [];
 
-    constructor(livestream: LiveStream, data: HypeTrainEndData) {
+    constructor(triggeredOn: Streamer, data: HypeTrainEndData) {
         super({
             eventId: data.id,
-            triggeredDuring: livestream,
+            triggeredDuring: triggeredOn.livestream,
             hasStartedAt: new Date(data.started_at),
             hasEndedAt: new Date(data.ended_at),
+            triggeredOn: triggeredOn,
         });
         this.addProperty("a", new Resource("HypeTrain"));
         this.addProperty(
@@ -49,18 +50,8 @@ export class HypeTrain extends CommunityEvent {
                 contributor: topContributor,
                 contribution: topContribution,
             });
-        }
-    }
-
-    public async semantize(
-        context?: Resource,
-        description?: string
-    ): Promise<void> {
-        if (!this.triggeredDuring) return;
-        super.semantize(context, description);
-        for (const { contributor, contribution } of this.topContributions) {
-            contributor.semantize();
-            contribution.semantize(context);
+            this.addToSemantize(topContributor);
+            this.addToSemantize(topContribution, triggeredOn.resource);
         }
     }
 }

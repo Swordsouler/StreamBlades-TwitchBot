@@ -1,5 +1,6 @@
 import { LiveStream } from "../LiveStream";
 import { RDFBase, Resource, XSDData } from "../RDFBase";
+import { Streamer } from "../Users/Streamer";
 import { Viewer } from "../Users/Viewer";
 import { ChannelPointsCustomRewardRedemptionAddData } from "./Subscriptions/ChannelPointsCustomRewardRedemptionAddSubscription";
 import { ViewerEvent } from "./ViewerEvent";
@@ -8,14 +9,15 @@ export class ChannelPointsCustomRewardRedemption extends ViewerEvent {
     private reward: ChannelPointsReward;
 
     constructor(
-        livestream: LiveStream,
+        triggeredOn: Streamer,
         data: ChannelPointsCustomRewardRedemptionAddData
     ) {
         super({
             eventId: data.id,
-            triggeredDuring: livestream,
+            triggeredDuring: triggeredOn.livestream,
             triggeredBy: new Viewer(data.user_id, data.user_name),
             timestamp: new Date(data.redeemed_at),
+            triggeredOn: triggeredOn,
         });
         this.addProperty(
             "a",
@@ -36,15 +38,8 @@ export class ChannelPointsCustomRewardRedemption extends ViewerEvent {
             data.reward.prompt
         );
         this.addProperty(new Resource("hasReward"), this.reward.resource);
-    }
 
-    public async semantize(
-        context?: Resource,
-        description?: string
-    ): Promise<void> {
-        if (!this.triggeredDuring) return;
-        super.semantize(context, description);
-        this.reward.semantize(context);
+        this.addToSemantize(this.reward, triggeredOn.resource);
     }
 }
 

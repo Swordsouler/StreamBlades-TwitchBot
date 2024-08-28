@@ -1,5 +1,6 @@
 import { LiveStream } from "../LiveStream";
 import { Resource, XSDData } from "../RDFBase";
+import { Streamer } from "../Users/Streamer";
 import { Viewer } from "../Users/Viewer";
 import { BanData } from "./Subscriptions/BanSubscription";
 import { ViewerEvent } from "./ViewerEvent";
@@ -7,12 +8,13 @@ import { ViewerEvent } from "./ViewerEvent";
 export class Ban extends ViewerEvent {
     bannedBy: Viewer;
 
-    constructor(livestream: LiveStream, data: BanData) {
+    constructor(triggeredOn: Streamer, data: BanData) {
         super({
             eventId: undefined,
-            triggeredDuring: livestream,
+            triggeredDuring: triggeredOn.livestream,
             triggeredBy: new Viewer(data.user_id, data.user_name),
             timestamp: new Date(data.banned_at),
+            triggeredOn: triggeredOn,
         });
         this.addProperty("a", new Resource("Ban"));
         this.addProperty(
@@ -38,11 +40,6 @@ export class Ban extends ViewerEvent {
                 )
             );
         }
-    }
-
-    public async semantize(context?: Resource): Promise<void> {
-        if (!this.triggeredDuring) return;
-        super.semantize(context);
-        this.bannedBy.semantize();
+        this.addToSemantize(this.bannedBy);
     }
 }

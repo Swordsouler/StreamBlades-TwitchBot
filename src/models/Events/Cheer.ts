@@ -1,16 +1,17 @@
-import { LiveStream } from "../LiveStream";
 import { Resource, XSDData } from "../RDFBase";
+import { Streamer } from "../Users/Streamer";
 import { Viewer } from "../Users/Viewer";
 import { CheerData } from "./Subscriptions/CheerSubscription";
 import { ViewerEvent } from "./ViewerEvent";
 
 export class Cheer extends ViewerEvent {
-    constructor(livestream: LiveStream, data: CheerData) {
+    constructor(triggeredOn: Streamer, data: CheerData) {
         super({
             eventId: undefined,
-            triggeredDuring: livestream,
+            triggeredDuring: triggeredOn.livestream,
             triggeredBy: new Viewer(data.user_id, data.user_name),
             timestamp: undefined,
+            triggeredOn: triggeredOn,
         });
         this.addProperty("a", new Resource("Cheer"));
         this.addProperty(

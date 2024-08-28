@@ -4,7 +4,8 @@
         "moduleResolution": "node",
         "outDir": "dist",
         "rootDir": "./src",
-        "target": "es5"
+        "target": "es2015",
+        "downlevelIteration": true
     },
     "exclude": ["dist", "node_modules"]
 }

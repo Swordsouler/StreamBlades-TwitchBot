@@ -1,5 +1,4 @@
 import { Resource, XSDData } from "../RDFBase";
-import { Viewer } from "../Users/Viewer";
 import { TwitchEvent, TwitchEventProps } from "./TwitchEvent";
 
 export type CommunityEventProps = {

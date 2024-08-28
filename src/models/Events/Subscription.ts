@@ -1,6 +1,4 @@
-import { LiveStream } from "../LiveStream";
-import { Resource } from "../RDFBase";
-import { Viewer } from "../Users/Viewer";
+import { Resource, XSDData } from "../RDFBase";
 import { ViewerEvent, ViewerEventProps } from "./ViewerEvent";
 
 export type SubscriptionProps = {
@@ -11,6 +9,9 @@ export abstract class Subscription extends ViewerEvent {
     constructor(props: SubscriptionProps) {
         const { hasTier, ...viewerEventProps } = props;
         super(viewerEventProps);
-        this.addProperty(new Resource("hasTier"), new Resource(hasTier));
+        this.addProperty(
+            new Resource("hasTier"),
+            new XSDData(hasTier, "string")
+        );
     }
 }

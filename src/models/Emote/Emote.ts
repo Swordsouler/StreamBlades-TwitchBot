@@ -10,8 +10,4 @@ export abstract class Emote extends RDFBase {
         this.code = code;
         this.addProperty(new Resource("hasCode"), new XSDData(code, "string"));
     }
-
-    public async semantize(context?: Resource): Promise<void> {
-        super.semantize();
-    }
 }

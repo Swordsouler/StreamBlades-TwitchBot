@@ -1,4 +1,3 @@
-import { error } from "console";
 import { Connection, query } from "stardog";
 
 export class RDFBase {
@@ -10,14 +9,22 @@ export class RDFBase {
 
     private subject: Subject;
     private properties: Map<string, string[]>;
+    private toSemantize: Map<string, RDFBase[]> = new Map<string, RDFBase[]>();
+
+    protected addToSemantize(rdf: RDFBase, context?: Resource): void {
+        const id = context ? context.toString() : "default";
+        if (!this.toSemantize.has(id)) this.toSemantize.set(id, []);
+        this.toSemantize.get(id)?.push(rdf);
+    }
 
     public get resource(): Resource {
         return this.subject as Resource;
     }
 
-    constructor(subject: Subject) {
+    constructor(subject: Subject, context?: Resource) {
         this.subject = subject;
         this.properties = new Map<string, string[]>();
+        this.addToSemantize(this, context);
     }
 
     public addProperty(predicate: Predicate, object: Object): Triple {
@@ -48,15 +55,28 @@ export class RDFBase {
             .join(" ;\n\t")} .`;
     }
 
-    public async semantize(
-        context?: Resource,
-        description?: string
-    ): Promise<void> {
-        let toSemantize = this.toString();
-        if (context) toSemantize = `graph ${context} {\n${toSemantize}\n}`;
+    public generateSemantizeString(rdfBase: RDFBase): string {
+        let toSemantize: string = "";
+        for (const context of rdfBase.toSemantize.keys()) {
+            if (context !== "default") toSemantize += `graph ${context} {\n`;
 
-        //console.log(toSemantize);
-        const updateQuery = `INSERT DATA { ${toSemantize} }`;
+            for (const rdf of rdfBase.toSemantize.get(context) as RDFBase[]) {
+                if (rdf !== rdfBase) {
+                    toSemantize += rdf.generateSemantizeString(rdf);
+                } else {
+                    toSemantize += `${rdf.toString()}\n`;
+                }
+            }
+
+            if (context !== "default") toSemantize += `}\n`;
+        }
+        return toSemantize;
+    }
+
+    public async semantize(description: string): Promise<void> {
+        const toSemantize = this.generateSemantizeString(this);
+
+        const updateQuery = `INSERT DATA {\n${toSemantize}}`;
         try {
             const result = await query.execute(
                 RDFBase.connection,
@@ -66,7 +86,7 @@ export class RDFBase {
             if (result.status !== 200) throw result;
             console.log(result.status, description);
         } catch (error) {
-            console.error(error, description);
+            console.error(error, description, updateQuery);
         }
     }
 }

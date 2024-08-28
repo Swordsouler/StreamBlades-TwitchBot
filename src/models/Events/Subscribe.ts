@@ -1,17 +1,18 @@
-import { LiveStream } from "../LiveStream";
 import { Resource, XSDData } from "../RDFBase";
+import { Streamer } from "../Users/Streamer";
 import { Viewer } from "../Users/Viewer";
 import { Subscription } from "./Subscription";
 import { SubscribeData } from "./Subscriptions/SubscribeSubscription";
 
 export class Subscribe extends Subscription {
-    constructor(livestream: LiveStream, data: SubscribeData) {
+    constructor(triggeredOn: Streamer, data: SubscribeData) {
         super({
             eventId: undefined,
-            triggeredDuring: livestream,
+            triggeredDuring: triggeredOn.livestream,
             triggeredBy: new Viewer(data.user_id, data.user_name),
             timestamp: undefined,
             hasTier: data.tier,
+            triggeredOn: triggeredOn,
         });
         this.addProperty("a", new Resource("Subscribe"));
         this.addProperty(

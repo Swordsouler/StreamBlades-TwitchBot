@@ -1,17 +1,16 @@
-import { LiveStream } from "../LiveStream";
 import { RDFBase, Resource, XSDData } from "../RDFBase";
+import { Streamer } from "../Users/Streamer";
 import { CommunityEvent } from "./CommunityEvent";
 import { PollEndData } from "./Subscriptions/PollEndSubscription";
 
 export class Poll extends CommunityEvent {
-    private choices: Choice[] = [];
-
-    constructor(livestream: LiveStream, data: PollEndData) {
+    constructor(triggeredOn: Streamer, data: PollEndData) {
         super({
             eventId: data.id,
-            triggeredDuring: livestream,
+            triggeredDuring: triggeredOn.livestream,
             hasStartedAt: new Date(data.started_at),
             hasEndedAt: new Date(data.ended_at),
+            triggeredOn: triggeredOn,
         });
         this.addProperty("a", new Resource("Prediction"));
         this.addProperty(
@@ -30,19 +29,9 @@ export class Poll extends CommunityEvent {
                 choice.channel_points_votes,
                 choice.votes
             );
-            this.choices.push(newChoice);
             this.addProperty(new Resource("hasChoice"), newChoice.resource);
-        }
-    }
 
-    public async semantize(
-        context?: Resource,
-        description?: string
-    ): Promise<void> {
-        if (!this.triggeredDuring) return;
-        super.semantize(context, description);
-        for (const choice of this.choices) {
-            choice.semantize(context);
+            this.addToSemantize(newChoice, triggeredOn.resource);
         }
     }
 }

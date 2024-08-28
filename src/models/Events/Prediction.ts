@@ -1,18 +1,17 @@
-import { LiveStream } from "../LiveStream";
 import { RDFBase, Resource, XSDData } from "../RDFBase";
+import { Streamer } from "../Users/Streamer";
 import { Viewer } from "../Users/Viewer";
 import { CommunityEvent } from "./CommunityEvent";
 import { PredictionEndData } from "./Subscriptions/PredictionEndSubscription";
 
 export class Prediction extends CommunityEvent {
-    private outcomes: Outcome[] = [];
-
-    constructor(livestream: LiveStream, data: PredictionEndData) {
+    constructor(triggeredOn: Streamer, data: PredictionEndData) {
         super({
             eventId: data.id,
-            triggeredDuring: livestream,
+            triggeredDuring: triggeredOn.livestream,
             hasStartedAt: new Date(data.started_at),
             hasEndedAt: new Date(data.ended_at),
+            triggeredOn: triggeredOn,
         });
         this.addProperty("a", new Resource("Prediction"));
         this.addProperty(
@@ -30,36 +29,23 @@ export class Prediction extends CommunityEvent {
 
         for (const outcome of data.outcomes) {
             const newOutcome = new Outcome(
+                triggeredOn.resource,
                 outcome.id,
                 outcome.title,
                 outcome.users,
                 outcome.channel_points,
                 outcome.top_predictors
             );
-            this.outcomes.push(newOutcome);
             this.addProperty(new Resource("hasOutcome"), newOutcome.resource);
-        }
-    }
 
-    public async semantize(
-        context?: Resource,
-        description?: string
-    ): Promise<void> {
-        if (!this.triggeredDuring) return;
-        super.semantize(context, description);
-        for (const outcome of this.outcomes) {
-            outcome.semantize(context);
+            this.addToSemantize(newOutcome);
         }
     }
 }
 
 export class Outcome extends RDFBase {
-    private topPredictions: {
-        predictor: Viewer;
-        prediction: RDFBase;
-    }[] = [];
-
     constructor(
+        triggeredOn: Resource,
         id: string,
         title: string,
         users: number,
@@ -72,7 +58,7 @@ export class Outcome extends RDFBase {
             channel_points_used: number;
         }[]
     ) {
-        super(new Resource("outcome_" + id));
+        super(new Resource("outcome_" + id), triggeredOn);
         this.addProperty("a", new Resource("Outcome"));
         this.addProperty(
             new Resource("hasTitle"),
@@ -106,18 +92,9 @@ export class Outcome extends RDFBase {
                 new Resource("hasChannelPointsUsed"),
                 new XSDData(topPredictor.channel_points_used, "integer")
             );
-            this.topPredictions.push({
-                predictor: predictor,
-                prediction: prediction,
-            });
-        }
-    }
 
-    public async semantize(context?: Resource): Promise<void> {
-        super.semantize(context);
-        for (const topPrediction of this.topPredictions) {
-            topPrediction.predictor.semantize(context);
-            topPrediction.prediction.semantize(context);
+            this.addToSemantize(predictor);
+            this.addToSemantize(prediction, triggeredOn);
         }
     }
 }

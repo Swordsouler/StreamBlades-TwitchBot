@@ -19,17 +19,6 @@ export abstract class ViewerEvent extends TwitchEvent {
             new Resource("hasTimestamp"),
             new XSDData(timestamp.toISOString(), "dateTime")
         );
-    }
-
-    public toString(): string {
-        return `${super.toString()}\n${this.triggeredBy.toString()}`;
-    }
-
-    public async semantize(
-        context?: Resource,
-        description?: string
-    ): Promise<void> {
-        if (!this.triggeredDuring) return;
-        super.semantize(context, description);
+        this.addToSemantize(triggeredBy);
     }
 }
