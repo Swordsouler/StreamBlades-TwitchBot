@@ -4,27 +4,32 @@ var cron = require("node-cron");
 
 const streamerManager = new StreamerManager();
 
-/*const Swordsouler = new Streamer(
-    "107968853",
-    "",
-    "0do9olkmornqn8fjxlfdz66ri7vgad38rd49ejq5yrczw90ab1"
-);*/
-
-//deleteDuplicateDisplayName();
-const deleteDuplicateDisplayName = async () => {
-    try {
-        await fetch(process.env.DELETE_DUPLICATE_DISPLAY_NAME_URL, {
-            method: "POST",
-        });
-        console.log("deleteDuplicateDisplayName: OK");
-    } catch (error) {
-        console.error("deleteDuplicateDisplayName: " + error.status);
-    }
-};
+//everyday at mindnight streamerManager.loadStreamers()
+cron.schedule("0 0 * * *", () => {
+    streamerManager.loadStreamers();
+});
 
 // Cron job to delete duplicate display names every hour
 cron.schedule("0 * * * *", () => {
-    deleteDuplicateDisplayName();
+    fetch(process.env.DELETE_DUPLICATE_DISPLAY_NAME_URL, {
+        method: "POST",
+    })
+        .then((res) => {
+            console.log("deleteDuplicateDisplayName: OK");
+        })
+        .catch((error) => {
+            console.error("deleteDuplicateDisplayName: " + error.status);
+        });
+
+    fetch(process.env.ARCHIVE_URL, {
+        method: "POST",
+    })
+        .then((res) => {
+            console.log("archive: OK");
+        })
+        .catch((error) => {
+            console.error("archive: " + error.status);
+        });
 });
 
 const originalConsoleLog = console.log;

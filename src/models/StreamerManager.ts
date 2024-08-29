@@ -1,7 +1,7 @@
 import AWSAppSyncClient, { AUTH_TYPE } from "aws-appsync";
 import { Streamer } from "./Users/Streamer";
 import gql from "graphql-tag";
-import AWS from "aws-sdk";
+var AWS = require("aws-sdk");
 
 AWS.config.update({
     region: process.env.AWS_REGION,
@@ -27,7 +27,6 @@ export class StreamerManager {
     constructor() {
         this.streamers = new Map<string, Streamer>();
         this.loadStreamers();
-        this.subscribeUserAccess();
     }
 
     private addStreamer(owner: string, refresh_token: string) {
@@ -42,7 +41,10 @@ export class StreamerManager {
         this.streamers.delete(owner);
     }
 
-    async loadStreamers() {
+    public async loadStreamers() {
+        // kill and remove all streamers
+        for (const streamer of this.streamers.values()) streamer.stop();
+        this.streamers.clear();
         const premiumUsers = await this.getPremiumUsers();
         this.getCredentials(premiumUsers);
     }
@@ -135,109 +137,5 @@ export class StreamerManager {
             );
         }
         return premiumUsers.map((user) => user.owner);
-    }
-
-    async subscribeUserAccess(): Promise<void> {
-        const subscriptionCreate = gql`
-            subscription MySubscription1 {
-                onCreateUserAccess {
-                    owner
-                    type
-                }
-            }
-        `;
-        const subscriptionUpdate = gql`
-            subscription MySubscription2 {
-                onUpdateUserAccess {
-                    owner
-                    type
-                }
-            }
-        `;
-        const subscriptionDelete = gql`
-            subscription MySubscription3 {
-                onDeleteUserAccess {
-                    owner
-                    type
-                }
-            }
-        `;
-
-        const subscription1 = client.subscribe({ query: subscriptionCreate });
-        const subscription2 = client.subscribe({ query: subscriptionUpdate });
-        const subscription3 = client.subscribe({ query: subscriptionDelete });
-
-        console.log("Subscriptions started");
-
-        subscription1.subscribe({
-            next: (eventData) => {
-                console.log("Subscription onCreateUserAccess:", eventData);
-                // if type is premium+ or admin
-                if (
-                    (eventData.data.onCreateUserAccess.type === "premium+" ||
-                        eventData.data.onCreateUserAccess.type === "admin") &&
-                    !this.streamers.has(eventData.data.onCreateUserAccess.owner)
-                ) {
-                    this.getCredential(
-                        eventData.data.onCreateUserAccess.owner
-                    ).then((refresh_token) => {
-                        this.addStreamer(
-                            eventData.data.onCreateUserAccess.owner,
-                            refresh_token
-                        );
-                    });
-                }
-            },
-            error: (error) => {
-                console.error("Subscription error onCreateUserAccess:", error);
-            },
-        });
-
-        subscription2.subscribe({
-            next: (eventData) => {
-                console.log("Subscription onUpdateUserAccess:", eventData);
-                if (
-                    (eventData.data.onUpdateUserAccess.type === "premium+" ||
-                        eventData.data.onUpdateUserAccess.type === "admin") &&
-                    !this.streamers.has(eventData.data.onUpdateUserAccess.owner)
-                ) {
-                    this.getCredential(
-                        eventData.data.onUpdateUserAccess.owner
-                    ).then((refresh_token) => {
-                        this.addStreamer(
-                            eventData.data.onUpdateUserAccess.owner,
-                            refresh_token
-                        );
-                    });
-                } else if (
-                    eventData.data.onUpdateUserAccess.type !== "premium+" &&
-                    eventData.data.onUpdateUserAccess.type !== "admin" &&
-                    this.streamers.has(eventData.data.onUpdateUserAccess.owner)
-                ) {
-                    this.removeStreamer(
-                        eventData.data.onUpdateUserAccess.owner
-                    );
-                }
-            },
-            error: (error) => {
-                console.error("Subscription error onUpdateUserAccess:", error);
-            },
-        });
-
-        subscription3.subscribe({
-            next: (eventData) => {
-                console.log("Subscription onDeleteUserAccess:", eventData);
-                if (
-                    this.streamers.has(eventData.data.onDeleteUserAccess.owner)
-                ) {
-                    this.removeStreamer(
-                        eventData.data.onDeleteUserAccess.owner
-                    );
-                }
-            },
-            error: (error) => {
-                console.error("Subscription error onDeleteUserAccess:", error);
-            },
-        });
     }
 }
