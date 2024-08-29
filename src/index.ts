@@ -1,6 +1,5 @@
 import "dotenv/config";
 import { StreamerManager } from "./models/StreamerManager";
-import { Streamer } from "./models/Users/Streamer";
 var cron = require("node-cron");
 
 const streamerManager = new StreamerManager();

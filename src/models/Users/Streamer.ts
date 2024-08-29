@@ -257,10 +257,15 @@ export class Streamer extends User {
                 this.eventsSubscriptions[randomEvent].triggerRandomEvent();
         }, 1000);*/
 
-        if (this.userId !== "107968853") return;
+        /*if (this.userId !== "107968853") return;
         this.eventsSubscriptions["stream.online"].triggerRandomEvent();
         setTimeout(() => {
             this.eventsSubscriptions["stream.offline"].triggerRandomEvent();
-        }, 30000);
+        }, 30000);*/
+    }
+
+    public stop() {
+        this.tes.disconnect();
+        console.log(`Disconnected from ${this.displayName}`);
     }
 }
