@@ -20,7 +20,7 @@ export class Message extends ViewerEvent {
         });
         this.addProperty("a", new Resource("Message"));
         this.addProperty(
-            new Resource("hadMessageType"),
+            new Resource("hasMessageType"),
             new XSDData(data.message_type, "string")
         );
         this.addProperty(

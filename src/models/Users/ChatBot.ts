@@ -32,6 +32,45 @@ export class ChatBot extends User {
             console.error(`Failed to send message to ${streamer.userId}`, data);
         }
     }
+
+    public async deleteDuplicateDisplayName() {
+        if (!this.ready) {
+            console.error("ChatBot is not ready");
+            return;
+        }
+        fetch(process.env.DELETE_DUPLICATE_DISPLAY_NAME_URL, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+            },
+        })
+            .then((res) => {
+                console.log("deleteDuplicateDisplayName: OK");
+            })
+            .catch((error) => {
+                console.error("deleteDuplicateDisplayName: " + error.status);
+            });
+    }
+
+    public async archive() {
+        if (!this.ready) {
+            console.error("ChatBot is not ready");
+            return;
+        }
+        fetch(process.env.ARCHIVE_URL, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+            },
+        })
+            .then((res) => {
+                const data = res.json();
+                console.log("archive: OK", data);
+            })
+            .catch((error) => {
+                console.error("archive: " + error.status);
+            });
+    }
 }
 
 export const StreamBlades = new ChatBot(

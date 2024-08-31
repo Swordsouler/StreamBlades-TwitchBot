@@ -126,8 +126,12 @@ export class XSDData {
     private type: DataType;
 
     constructor(value: string | number | boolean, type: DataType) {
-        this.value = value.toString();
+        this.value = this.escapeQuotes(value.toString());
         this.type = type;
+    }
+
+    private escapeQuotes(value: string): string {
+        return value.replace(/"/g, '\\"');
     }
 
     toString(): string {

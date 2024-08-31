@@ -128,7 +128,7 @@ export class StreamerManager {
         const newNextToken = result.data["listUserAccesses"].nextToken;
         const users = result.data["listUserAccesses"].items;
         let premiumUsers = users.filter(
-            (user) => user.type === "premium+" || user.type === "admin"
+            (user) => user.type === "premium_plus" || user.type === "admin"
         );
         // recursively nextToken
         if (newNextToken) {

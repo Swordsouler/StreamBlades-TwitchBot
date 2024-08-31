@@ -98,7 +98,7 @@ export class Streamer extends User {
         if (data.data.length > 0) {
             console.log(`${this.displayName} is live!`);
             this.livestream = new LiveStream(
-                data.data[0].broadcaster_user_id,
+                this,
                 data.data[0].id,
                 new Date(data.data[0].started_at)
             );
@@ -175,7 +175,7 @@ export class Streamer extends User {
             this.userId,
             (data) => {
                 new SubscriptionMessage(this, data).semantize(
-                    `channel.subscription.message from ${data.user_name} to ${data.broadcaster_user_name}}`
+                    `channel.subscription.message from ${data.user_name} to ${data.broadcaster_user_name}`
                 );
             }
         ),

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { StreamerManager } from "./models/StreamerManager";
+import { StreamBlades } from "./models/Users/ChatBot";
 var cron = require("node-cron");
 
 const streamerManager = new StreamerManager();
@@ -11,25 +12,9 @@ cron.schedule("0 0 * * *", () => {
 
 // Cron job to delete duplicate display names every hour
 cron.schedule("0 * * * *", () => {
-    fetch(process.env.DELETE_DUPLICATE_DISPLAY_NAME_URL, {
-        method: "POST",
-    })
-        .then((res) => {
-            console.log("deleteDuplicateDisplayName: OK");
-        })
-        .catch((error) => {
-            console.error("deleteDuplicateDisplayName: " + error.status);
-        });
-
-    fetch(process.env.ARCHIVE_URL, {
-        method: "POST",
-    })
-        .then((res) => {
-            console.log("archive: OK");
-        })
-        .catch((error) => {
-            console.error("archive: " + error.status);
-        });
+    // à testé manuellement avant déploiement
+    //StreamBlades.archive();
+    StreamBlades.deleteDuplicateDisplayName();
 });
 
 const originalConsoleLog = console.log;
