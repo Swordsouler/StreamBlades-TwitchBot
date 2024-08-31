@@ -29,9 +29,10 @@ import { ChannelPointsCustomRewardRedemption } from "../Events/ChannelPointsCust
 import { ChannelPointsCustomRewardRedemptionAddSubscription } from "../Events/Subscriptions/ChannelPointsCustomRewardRedemptionAddSubscription";
 import { BanSubscription } from "../Events/Subscriptions/BanSubscription";
 import { Ban } from "../Events/Ban";
+import { TES } from "../../api/TwitchEvent/tes";
 
 export class Streamer extends User {
-    private tes: any;
+    private tes: TES;
     private bttv: BTTV;
     public livestream: LiveStream;
 
@@ -51,7 +52,6 @@ export class Streamer extends User {
 
     public async connect() {
         try {
-            const TES = require("tesjs");
             this.tes = new TES({
                 identity: {
                     id: process.env.TWITCH_CLIENT_ID,
