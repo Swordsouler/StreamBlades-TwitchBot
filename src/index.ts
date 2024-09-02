@@ -12,8 +12,7 @@ cron.schedule("0 0 * * *", () => {
 
 // Cron job to delete duplicate display names every hour
 cron.schedule("0 * * * *", () => {
-    // à testé manuellement avant déploiement
-    //StreamBlades.archive();
+    StreamBlades.archive();
     StreamBlades.deleteDuplicateDisplayName();
 });
 
