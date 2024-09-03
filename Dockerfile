@@ -4,8 +4,10 @@ RUN mkdir /app
 
 WORKDIR /app
 
-COPY  * /app
+COPY src /app/src
+COPY package.json /app
+COPY tsconfig.json /app
 
 RUN npm i
-RUN npm run tsc
+RUN npx tsc
 CMD ["node", "/app/dist/index.js"]
