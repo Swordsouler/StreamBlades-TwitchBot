@@ -6,6 +6,7 @@ WORKDIR /app
 
 COPY src /app/src
 COPY package.json /app
+COPY .env /app
 COPY tsconfig.json /app
 
 RUN npm i
