@@ -31,7 +31,7 @@ jobs:
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@v1.0.3
         with:
-          script: cd StreamBlades-TwitchBot && sh docker-run.sh
+          script: cd StreamBlades-TwitchBot && tar -xvf deploy.tar && sh docker-run.sh
           username: ${{ secrets.USERNAME }}
           host: ${{ secrets.HOST }}
           key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
