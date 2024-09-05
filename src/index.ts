@@ -5,12 +5,12 @@ var cron = require("node-cron");
 
 const streamerManager = new StreamerManager();
 
-//everyday at mindnight streamerManager.loadStreamers()
+// everyday at midnight streamerManager.loadStreamers() to reload the streamers
 cron.schedule("0 0 * * *", () => {
     streamerManager.loadStreamers();
 });
 
-// Cron job to delete duplicate display names every hour
+// every hour, archive the streamers and delete the duplicates display names
 cron.schedule("0 * * * *", () => {
     StreamBlades.archive();
     StreamBlades.deleteDuplicateDisplayName();
