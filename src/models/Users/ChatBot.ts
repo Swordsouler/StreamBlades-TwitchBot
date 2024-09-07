@@ -63,8 +63,8 @@ export class ChatBot extends User {
                 Authorization: `Bearer ${this.accessToken}`,
             },
         })
-            .then((res) => {
-                const data = res.json();
+            .then(async (res) => {
+                const data = await res.json();
                 console.log("archive: OK", data);
             })
             .catch((error) => {
