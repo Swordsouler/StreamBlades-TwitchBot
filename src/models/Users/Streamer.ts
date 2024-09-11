@@ -124,7 +124,7 @@ export class Streamer extends User {
             return sub;
         } catch (e) {
             console.error(this.userId, `(${this.displayName})`, event.type, e);
-            if (
+            /*if (
                 retry &&
                 e.message !==
                     "403 Forbidden: subscription missing proper authorization"
@@ -132,7 +132,7 @@ export class Streamer extends User {
                 setTimeout(async () => {
                     console.log("Retrying to subscribe to " + event.type);
                     await this.subscribe(event, false);
-                }, 120000);
+                }, 120000);*/
         }
     }
 
