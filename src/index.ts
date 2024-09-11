@@ -15,6 +15,10 @@ cron.schedule("0 * * * *", () => {
     StreamBlades.archive();
     StreamBlades.deleteDuplicateDisplayName();
 });
+setTimeout(() => {
+    StreamBlades.archive();
+    StreamBlades.deleteDuplicateDisplayName();
+}, 60000);
 
 const originalConsoleLog = console.log;
 console.log = function (...args: any[]) {
