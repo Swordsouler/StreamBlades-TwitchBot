@@ -90,7 +90,11 @@ export class Streamer extends User {
         this.subscribeToAllEvents();
         setTimeout(async () => {
             const subscriptions2 = await this.tes.getSubscriptions();
-            console.log(this.displayName, subscriptions2.total);
+            console.log(
+                this.displayName,
+                " is subscribed to ",
+                subscriptions2.total
+            );
         }, 10000);
     }
 
