@@ -92,8 +92,9 @@ export class Streamer extends User {
             const subscriptions2 = await this.tes.getSubscriptions();
             console.log(
                 this.displayName,
-                " is subscribed to ",
-                subscriptions2.total
+                "is subscribed to",
+                subscriptions2.total,
+                "events"
             );
         }, 10000);
     }
