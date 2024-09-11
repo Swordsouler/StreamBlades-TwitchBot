@@ -79,9 +79,19 @@ export class Streamer extends User {
         for (const subscription of await subscriptions["data"]) {
             if (subscription.status === "websocket_disconnected") {
                 await this.tes.unsubscribe(subscription.id);
+                console.log(
+                    "Unsubscribed from",
+                    subscription.type,
+                    "for",
+                    this.displayName
+                );
             }
         }
         this.subscribeToAllEvents();
+        setTimeout(async () => {
+            const subscriptions2 = await this.tes.getSubscriptions();
+            console.log(this.displayName, subscriptions2.total);
+        }, 10000);
     }
 
     private async checkLiveStream() {
@@ -110,8 +120,8 @@ export class Streamer extends User {
     }
 
     public async subscribe(
-        event: EventSubscription,
-        retry: boolean = true
+        event: EventSubscription
+        //retry: boolean = true
     ): Promise<any> {
         try {
             const sub = await this.tes.subscribe(
@@ -119,20 +129,20 @@ export class Streamer extends User {
                 event.condition,
                 event.version
             );
-            await this.tes.on(event.type, event.callback);
+            this.tes.on(event.type, event.callback);
             console.log(`Subscribed to ${event.type} for ${this.displayName}`);
             return sub;
         } catch (e) {
             console.error(this.userId, `(${this.displayName})`, event.type, e);
             /*if (
                 retry &&
-                e.message !==
-                    "403 Forbidden: subscription missing proper authorization"
+                e.message ===
+                    "429 Too Many Requests: number of websocket transports limit exceeded"
             )
                 setTimeout(async () => {
                     console.log("Retrying to subscribe to " + event.type);
                     await this.subscribe(event, false);
-                }, 120000);*/
+                }, 65000);*/
         }
     }
 
@@ -240,9 +250,12 @@ export class Streamer extends User {
     };
 
     private subscribeToAllEvents() {
-        for (const event in this.eventsSubscriptions) {
-            this.subscribe(this.eventsSubscriptions[event]);
-        }
+        const events = Object.keys(this.eventsSubscriptions);
+        events.forEach((event, index) => {
+            setTimeout(() => {
+                this.subscribe(this.eventsSubscriptions[event]);
+            }, index * 200);
+        });
 
         /*setInterval(() => {
             // trigger a random event
