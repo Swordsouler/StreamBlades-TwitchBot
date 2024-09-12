@@ -75,18 +75,33 @@ export class RDFBase {
 
     public async semantize(description: string): Promise<void> {
         const toSemantize = this.generateSemantizeString(this);
-
         const updateQuery = `INSERT DATA {\n${toSemantize}}`;
-        try {
-            const result = await query.execute(
-                RDFBase.connection,
-                process.env.STARDOG_DATABASE,
-                updateQuery
-            );
-            if (result.status !== 200) throw result;
-            console.log(result.status, description);
-        } catch (error) {
-            console.error(error, description, updateQuery);
+        const maxRetries = 5;
+        let attempt = 0;
+
+        while (attempt < maxRetries) {
+            try {
+                const result = await query.execute(
+                    RDFBase.connection,
+                    process.env.STARDOG_DATABASE,
+                    updateQuery
+                );
+                if (result.status !== 200) throw result;
+                console.log(result.status, description);
+                return; // Exit the loop if the query succeeds
+            } catch (error) {
+                attempt++;
+                console.error(
+                    `${description} failed. Attempt ${attempt}/${maxRetries}.`
+                );
+                if (attempt >= maxRetries) {
+                    console.error(
+                        `Failed to semantize ${description} after ${maxRetries} attempts. ${error} ${updateQuery}`
+                    );
+                    throw error; // Rethrow the error after the maximum number of attempts
+                }
+                await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before retrying
+            }
         }
     }
 }
@@ -131,7 +146,7 @@ export class XSDData {
     }
 
     private escapeQuotes(value: string): string {
-        return value.replace(/"/g, '\\"');
+        return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
     }
 
     toString(): string {

@@ -70,6 +70,7 @@ export class User extends RDFBase {
         }
         const data = await response.json();
         this.accessToken = data.access_token;
+        console.log(`Refreshed access token for user ${this.displayName}`);
         clearTimeout(this.refreshTimeout);
         this.refreshTimeout = setTimeout(
             this.refreshAccessToken,
