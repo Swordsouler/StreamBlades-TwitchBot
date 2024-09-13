@@ -2,8 +2,8 @@ import { Streamer } from "./Streamer";
 import { User } from "./User";
 
 export class ChatBot extends User {
-    constructor(userId: string, refreshToken: string) {
-        super(userId, "", refreshToken);
+    constructor(userId: string, displayName: string, refreshToken: string) {
+        super(userId, displayName, refreshToken);
     }
 
     public async sendChatMessage(streamer: Streamer, message: string) {
@@ -75,5 +75,6 @@ export class ChatBot extends User {
 
 export const StreamBlades = new ChatBot(
     process.env.TWITCH_BOT_ID,
+    "StreamBlades",
     process.env.TWITCH_BOT_REFRESH_TOKEN
 );
