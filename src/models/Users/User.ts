@@ -3,12 +3,12 @@ import { RDFBase, Resource, XSDData } from "../RDFBase";
 export class User extends RDFBase {
     public userId: string;
     public displayName: string;
-    protected accessToken: string;
+    public accessToken: string;
     protected refreshToken: string;
     protected get ready(): boolean {
         return !!this.accessToken;
     }
-    private refreshTimeout: NodeJS.Timeout;
+    public refreshTimeout: NodeJS.Timeout;
 
     constructor(userId: string, displayName?: string, refreshToken?: string) {
         if (!userId) {

@@ -43,7 +43,11 @@ export class StreamerManager {
 
     public async loadStreamers() {
         // kill and remove all streamers
-        for (const streamer of this.streamers.values()) streamer.stop();
+        const stopPromises = [];
+        for (const streamer of this.streamers.values()) {
+            stopPromises.push(streamer.stop());
+        }
+        await Promise.all(stopPromises);
         this.streamers.clear();
         const premiumUsers = await this.getPremiumUsers();
         this.getCredentials(premiumUsers);

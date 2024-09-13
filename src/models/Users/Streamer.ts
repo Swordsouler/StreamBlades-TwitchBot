@@ -77,7 +77,10 @@ export class Streamer extends User {
 
         const subscriptions = await this.tes.getSubscriptions();
         for (const subscription of await subscriptions["data"]) {
-            if (subscription.status === "websocket_disconnected") {
+            if (
+                subscription.status === "websocket_disconnected" ||
+                subscription.status === "websocket_failed_ping_pong"
+            ) {
                 await this.tes.unsubscribe(subscription.id);
                 console.log(
                     "Unsubscribed from",
@@ -89,11 +92,11 @@ export class Streamer extends User {
         }
         this.subscribeToAllEvents();
         setTimeout(async () => {
-            const subscriptions2 = await this.tes.getSubscriptions();
+            const subscriptions = await this.tes.getSubscriptions();
             console.log(
                 this.displayName,
                 "is subscribed to",
-                subscriptions2.total,
+                subscriptions.total,
                 "events"
             );
         }, 10000);
@@ -282,8 +285,9 @@ export class Streamer extends User {
         }, 30000);*/
     }
 
-    public stop() {
-        this.tes.disconnect();
+    public async stop() {
+        await this.tes.disconnect();
+        clearTimeout(this.refreshTimeout);
         console.log(`Disconnected from ${this.displayName}`);
     }
 }

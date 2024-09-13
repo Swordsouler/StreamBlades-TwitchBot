@@ -188,10 +188,30 @@ export class TES {
         });
     }
 
-    disconnect() {
+    async disconnect() {
+        const token = await this.auth.getToken();
+        const headers = {
+            "client-id": this.clientID,
+            Authorization: `Bearer ${token}`,
+            "content-type": "application/json",
+        };
+        const deletePromises = Object.keys(this.eventManager._events).map(
+            (key) => {
+                return RequestManager.request(
+                    `https://api.twitch.tv/helix/eventsub/subscriptions?id=${key}`,
+                    {
+                        method: "DELETE",
+                        headers: headers,
+                    },
+                    undefined,
+                    this.auth
+                );
+            }
+        );
+        await Promise.all(deletePromises);
+        this.eventManager.clearListeners();
         logger.debug("Disconnecting from WebSocket and cleaning up resources");
         this.wsclient.close();
-        this.eventManager.clearListeners();
     }
 
     /**

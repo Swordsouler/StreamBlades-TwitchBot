@@ -1,4 +1,6 @@
+import { AuthManager } from "./auth";
 import { logger } from "./logger";
+import { RequestManager } from "./request";
 
 export class EventManager {
     _events: Record<string, (data: any, sub: any) => void>;
@@ -45,7 +47,6 @@ export class EventManager {
     }
 
     clearListeners() {
-        logger.debug("Clearing all event listeners");
         this._events = {};
     }
 
