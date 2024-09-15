@@ -5,6 +5,10 @@ var cron = require("node-cron");
 
 const streamerManager = new StreamerManager();
 
+/*setTimeout(() => {
+    streamerManager.loadStreamers();
+}, 60000);*/
+
 // everyday at midnight streamerManager.loadStreamers() to reload the streamers
 cron.schedule("0 0 * * *", () => {
     streamerManager.loadStreamers();
