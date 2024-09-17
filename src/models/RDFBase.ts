@@ -98,7 +98,7 @@ export class RDFBase {
                     console.error(
                         `Failed to semantize ${description} after ${maxRetries} attempts. ${error} ${updateQuery}`
                     );
-                    throw error; // Rethrow the error after the maximum number of attempts
+                    //throw error; // Rethrow the error after the maximum number of attempts
                 }
                 await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before retrying
             }
