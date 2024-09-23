@@ -30,6 +30,9 @@ export class StreamerManager {
     }
 
     private addStreamer(owner: string, refresh_token: string) {
+        if (this.streamers.has(owner)) {
+            return;
+        }
         this.streamers.set(
             owner,
             new Streamer(owner.replace("twitch_", ""), "", refresh_token)
@@ -42,15 +45,18 @@ export class StreamerManager {
     }
 
     public async loadStreamers() {
-        // kill and remove all streamers
-        const stopPromises = [];
-        for (const streamer of this.streamers.values()) {
-            stopPromises.push(streamer.stop());
+        const newStreamers = await this.getPremiumUsers();
+        const currentStreamers = new Map(this.streamers);
+
+        // Stop and remove streamers that are no longer present
+        for (const [id, streamer] of currentStreamers) {
+            if (!newStreamers.includes(id)) {
+                await streamer.stop();
+                this.streamers.delete(id);
+            }
         }
-        await Promise.all(stopPromises);
-        this.streamers.clear();
-        const premiumUsers = await this.getPremiumUsers();
-        this.getCredentials(premiumUsers);
+
+        this.getCredentials(newStreamers);
     }
 
     async getCredential(owner: string): Promise<string> {
