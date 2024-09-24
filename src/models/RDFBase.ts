@@ -96,7 +96,9 @@ export class RDFBase {
                 );
                 if (attempt >= maxRetries) {
                     console.error(
-                        `Failed to semantize ${description} after ${maxRetries} attempts. ${error} ${updateQuery}`
+                        `Failed to semantize ${description} after ${maxRetries} attempts.`,
+                        error,
+                        updateQuery
                     );
                     //throw error; // Rethrow the error after the maximum number of attempts
                 }
