@@ -9,6 +9,7 @@ export class User extends RDFBase {
         return !!this.accessToken;
     }
     public refreshTimeout: NodeJS.Timeout;
+    public tokenExpiration: Date;
 
     constructor(userId: string, displayName?: string, refreshToken?: string) {
         if (!userId) {
@@ -47,6 +48,11 @@ export class User extends RDFBase {
 
     public async refreshAccessToken(): Promise<string> {
         if (!this.refreshToken) return "";
+        if (
+            this.tokenExpiration &&
+            this.tokenExpiration > new Date(Date.now() + 60000)
+        )
+            return this.accessToken;
 
         const response = await fetch("https://id.twitch.tv/oauth2/token", {
             method: "POST",
@@ -70,6 +76,7 @@ export class User extends RDFBase {
         }
         const data = await response.json();
         this.accessToken = data.access_token;
+        this.tokenExpiration = new Date(Date.now() + data.expires_in * 1000);
         console.log(
             `Refreshed access token for user ${this.userId} (${this.displayName}) expires in ${data.expires_in} seconds.`
         );
