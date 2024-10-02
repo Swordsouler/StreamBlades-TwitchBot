@@ -1,12 +1,7 @@
-// Copyright (c) 2022-2023 Mitchell Adair
-//
-// This software is released under the MIT License.
-
 import { EventManager } from "./events";
 import { logger } from "./logger";
 import { TESUtils } from "./utils";
 
-// https://opensource.org/licenses/MIT
 const WebSocket = require("ws");
 
 const WS_URL = "wss://eventsub.wss.twitch.tv/ws";
@@ -27,7 +22,6 @@ export class WebSocketClient {
 
     constructor(wsURL: string) {
         this._connections = {};
-
         this._wsURL = wsURL || WS_URL;
     }
 
@@ -43,11 +37,6 @@ export class WebSocketClient {
         });
     }
 
-    /**
-     * Get the ID of a free WebSocket connection
-     *
-     * @returns a Promise resolving to the ID of a free WebSocket connection
-     */
     async getFreeConnection(eventManager: EventManager): Promise<string> {
         logger.debug("Getting free WebSocket connection");
         const connectionID = Object.keys(this._connections).find((key) => {
@@ -77,24 +66,12 @@ export class WebSocketClient {
         }
     }
 
-    /**
-     * Remove a subscription from our connections
-     *
-     * @param {string} id the id of the subscription to remove
-     */
     removeSubscription(id: string | number) {
-        // naively delete from ALL connections -- connections without that subscription will be unaffected
         Object.values(this._connections).forEach(
             (connection) => delete connection.subscriptions[id]
         );
     }
 
-    /**
-     * Add a subscription to a connection
-     *
-     * @param {string} connectionID the connection id
-     * @param {Subscription} subscription the subscription data
-     */
     addSubscription(
         connectionID: string | number,
         { id, type, condition }: any
@@ -102,12 +79,6 @@ export class WebSocketClient {
         this._connections[connectionID].subscriptions[id] = { type, condition };
     }
 
-    /**
-     * Get the subscription ID for a type and condition
-     *
-     * @param {string} type the subscription type
-     * @param {Condition} condition the condition
-     */
     findSubscriptionID(type: string, condition: any) {
         for (const session in this._connections) {
             const connection = this._connections[session];
@@ -208,6 +179,15 @@ export class WebSocketClient {
                 `WebSocket connection "${connectionID}" closed. ${code}:${reason}`
             );
             delete this._connections[connectionID];
+
+            if (code === 1006) {
+                logger.debug(
+                    "Connection closed abnormally, attempting to reconnect in 5 minutes..."
+                );
+                setTimeout(() => {
+                    this._addConnection(onWelcome, url, eventManager);
+                }, 5 * 60 * 1000); // 5 minutes
+            }
         };
         return ws;
     }
