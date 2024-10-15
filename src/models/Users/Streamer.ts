@@ -67,8 +67,8 @@ export class Streamer extends User {
                     type: "websocket",
                 },
                 options: {
-                    debug: true,
-                    logging: true,
+                    debug: false,
+                    logging: false,
                 },
             });
         } catch (e) {
