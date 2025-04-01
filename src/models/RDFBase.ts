@@ -1,4 +1,4 @@
-import { Connection, query } from "stardog";
+import Stardog, { Connection, query } from "stardog";
 
 export class RDFBase {
     private static connection = new Connection({
@@ -72,6 +72,16 @@ export class RDFBase {
         }
         return toSemantize;
     }
+
+    /*public static async query(queryString: string): Promise<Stardog.HTTP.Body> {
+        const result = await query.execute(
+            RDFBase.connection,
+            process.env.STARDOG_DATABASE,
+            queryString
+        );
+        if (result.status !== 200) throw result;
+        return result.body.results.bindings;
+    }*/
 
     public async semantize(description: string): Promise<void> {
         const toSemantize = this.generateSemantizeString(this);

@@ -2,12 +2,15 @@ import { RDFBase, Resource, XSDData } from "./RDFBase";
 import { Streamer } from "./Users/Streamer";
 
 export class LiveStream extends RDFBase {
+    public liveStreamId: string;
+
     constructor(
         broadcaster: Streamer,
         livestreamId: string,
         hasStartedAt: Date
     ) {
         super(new Resource("livestream_" + livestreamId), broadcaster.resource);
+        this.liveStreamId = livestreamId;
         this.addProperty("a", new Resource("LiveStream"));
         this.addProperty(
             new Resource("hasStartedAt"),

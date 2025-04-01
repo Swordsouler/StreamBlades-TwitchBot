@@ -10,9 +10,9 @@ const streamerManager = new StreamerManager();
 }, 60000);*/
 
 // everyday at midnight streamerManager.loadStreamers() to reload the streamers
-cron.schedule("0 0 * * *", () => {
+/*cron.schedule("0 0 * * *", () => {
     streamerManager.loadStreamers();
-});
+});*/
 
 // every hour, archive the streamers and delete the duplicates display names
 cron.schedule("0 * * * *", () => {

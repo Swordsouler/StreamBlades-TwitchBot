@@ -1,4 +1,7 @@
-import { MessageSubscription } from "../Events/Subscriptions/MessageSubscription";
+import {
+    MessageData,
+    MessageSubscription,
+} from "../Events/Subscriptions/MessageSubscription";
 import { FollowSubscription } from "../Events/Subscriptions/FollowSubscription";
 import { Resource } from "../RDFBase";
 import { User } from "./User";
@@ -30,6 +33,7 @@ import { ChannelPointsCustomRewardRedemptionAddSubscription } from "../Events/Su
 import { BanSubscription } from "../Events/Subscriptions/BanSubscription";
 import { Ban } from "../Events/Ban";
 import { TES } from "../../api/TwitchEvent/tes";
+//import { StreamBlades } from "./ChatBot";
 
 export class Streamer extends User {
     private tes: TES;
@@ -222,6 +226,14 @@ export class Streamer extends User {
             new Message(this, data, this.bttv).semantize(
                 `channel.chat.message from ${data.chatter_user_name} to ${data.broadcaster_user_name}`
             );
+            /*try {
+                this.processCommands(data);
+            } catch (e) {
+                console.error(
+                    `Failed to process command from ${data.chatter_user_name}: ${data.message.text}`,
+                    e
+                );
+            }*/
         }),
         "channel.cheer": new CheerSubscription(this.userId, (data) => {
             new Cheer(this, data).semantize(
@@ -256,6 +268,82 @@ export class Streamer extends User {
             );
         }),
     };
+
+    /*private async processCommands(data: MessageData) {
+        if (!data.badges.some((badge) => badge.set_id === "moderator")) return;
+        let message = data.message.text;
+        if (!message.startsWith("$")) return;
+        message = message.substring(1);
+        if (!message.includes(":")) return;
+        const command = message.split(":")[0];
+        message = message.split(":")[1];
+        const args = message.split("?");
+        const commandType = args[0];
+        const option = args[1] === "" ? null : args[1];
+        switch (commandType) {
+            case "pileouface":
+                switch (command) {
+                    case "start":
+                        StreamBlades.startPrediction(
+                            this,
+                            "Pile ou Face ?",
+                            ["Pile", "Face"],
+                            parseInt(option ?? "60")
+                        );
+                        break;
+                    case "end":
+                        const result =
+                            option ?? Math.random() < 0.5 ? "Pile" : "Face";
+                        const outcomeID = await StreamBlades.getOutcomeID(
+                            this,
+                            result
+                        );
+                        if (outcomeID) {
+                            StreamBlades.endPrediction(this, outcomeID);
+                            StreamBlades.sendMessage(
+                                this,
+                                `Le résultat est ${result} !`
+                            );
+                        }
+                        break;
+                }
+                break;
+            case "ban":
+                switch (command) {
+                    case "start":
+                        const moderators = await StreamBlades.getModerators(
+                            this
+                        );
+                        if (moderators.length < 2) return;
+                        StreamBlades.startPrediction(
+                            this,
+                            "Quel est le modérateur qui a fait le plus de bans pendant le stream ?",
+                            moderators,
+                            parseInt(option ?? "60")
+                        );
+                        break;
+                    case "end":
+                        const moderator = await StreamBlades.getBestModerator(
+                            this
+                        );
+                        if (moderator) {
+                            const outcomeID = await StreamBlades.getOutcomeID(
+                                this,
+                                moderator.name
+                            );
+                            if (outcomeID) {
+                                StreamBlades.endPrediction(this, outcomeID);
+                                StreamBlades.sendMessage(
+                                    this,
+                                    `Le modérateur qui a fait le plus de bans est ${moderator.name} avec ${moderator.bans} bans !`
+                                );
+                            }
+                        }
+                        break;
+                }
+                break;
+        }
+    }*/
 
     private subscribeToAllEvents() {
         const events = Object.keys(this.eventsSubscriptions);

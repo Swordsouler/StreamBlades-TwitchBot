@@ -4,6 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
+        "backup": "tsc && node dist/backup.js",
         "test-start": "tsc && node dist/index.js",
         "start": "node dist/index.js",
         "prod": "npm run start > output.log 2>&1",
