@@ -66,6 +66,8 @@ export class ChatBot extends User {
         })
             .then(async (res) => {
                 const data = await res.json();
+                if (!res.ok)
+                    return console.error("archive: FAILED", res.status, data);
                 console.log("archive: OK", data);
             })
             .catch((error) => {
