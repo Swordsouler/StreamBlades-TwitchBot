@@ -46,6 +46,10 @@ export class StreamerManager {
 
     public async loadStreamers() {
         const newStreamers = await this.getPremiumUsers();
+        console.log(
+            `loadStreamers: ${newStreamers.length} premium user(s) found`,
+            newStreamers
+        );
         const currentStreamers = new Map(this.streamers);
 
         // Stop and remove streamers that are no longer present
@@ -106,6 +110,9 @@ export class StreamerManager {
             let credentials = result.data["listTwitchCredentials"].items.filter(
                 (credential) => owners.includes(credential.owner)
             );
+            console.log(
+                `getCredentials: ${credentials.length} matching credential(s) found`
+            );
             if (newNextToken) {
                 credentials = credentials.concat(
                     await this.getCredentials(owners, newNextToken)
@@ -120,32 +127,41 @@ export class StreamerManager {
     }
 
     async getPremiumUsers(nextToken: string = null): Promise<string[]> {
-        const query = gql`
-            query MyQuery($nextToken: String) {
-                listUserAccesses(nextToken: $nextToken) {
-                    items {
-                        owner
-                        type
+        try {
+            const query = gql`
+                query MyQuery($nextToken: String) {
+                    listUserAccesses(nextToken: $nextToken) {
+                        items {
+                            owner
+                            type
+                        }
+                        nextToken
                     }
-                    nextToken
                 }
-            }
-        `;
-        const result = await client.query({
-            query,
-            variables: { nextToken },
-        });
-        const newNextToken = result.data["listUserAccesses"].nextToken;
-        const users = result.data["listUserAccesses"].items;
-        let premiumUsers = users.filter(
-            (user) => user.type === "premium_plus" || user.type === "admin"
-        );
-        // recursively nextToken
-        if (newNextToken) {
-            premiumUsers = premiumUsers.concat(
-                await this.getPremiumUsers(newNextToken)
+            `;
+            const result = await client.query({
+                query,
+                variables: { nextToken },
+            });
+            const newNextToken = result.data["listUserAccesses"].nextToken;
+            const users = result.data["listUserAccesses"].items;
+            console.log(
+                `getPremiumUsers: ${users.length} user access(es) returned by AWS`,
+                users.map((user) => user.type)
             );
+            let premiumUsers = users.filter(
+                (user) => user.type === "premium_plus" || user.type === "admin"
+            );
+            // recursively nextToken
+            if (newNextToken) {
+                premiumUsers = premiumUsers.concat(
+                    await this.getPremiumUsers(newNextToken)
+                );
+            }
+            return premiumUsers.map((user) => user.owner);
+        } catch (error) {
+            console.error("getPremiumUsers: AWS/GraphQL error:", error);
+            return [];
         }
-        return premiumUsers.map((user) => user.owner);
     }
 }
