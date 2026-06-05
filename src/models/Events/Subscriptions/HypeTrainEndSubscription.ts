@@ -29,7 +29,7 @@ export class HypeTrainEndSubscription extends EventSubscription {
             {
                 broadcaster_user_id: broadcasterId,
             },
-            "1",
+            "2",
             callback
         );
     }

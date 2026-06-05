@@ -132,8 +132,8 @@ export class Streamer extends User {
     }
 
     public async subscribe(
-        event: EventSubscription
-        //retry: boolean = true
+        event: EventSubscription,
+        retry: boolean = true
     ): Promise<any> {
         try {
             const sub = await this.tes.subscribe(
@@ -146,15 +146,11 @@ export class Streamer extends User {
             return sub;
         } catch (e) {
             console.error(this.userId, `(${this.displayName})`, event.type, e);
-            /*if (
-                retry &&
-                e.message ===
-                    "429 Too Many Requests: number of websocket transports limit exceeded"
-            )
+            if (retry && e?.message?.includes("429"))
                 setTimeout(async () => {
                     console.log("Retrying to subscribe to " + event.type);
                     await this.subscribe(event, false);
-                }, 65000);*/
+                }, 65000);
         }
     }
 
