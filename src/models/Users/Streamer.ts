@@ -79,21 +79,33 @@ export class Streamer extends User {
             console.error(e);
         }
 
-        const subscriptions = await this.tes.getSubscriptions();
-        for (const subscription of await subscriptions["data"]) {
-            if (
-                subscription.status === "websocket_disconnected" ||
-                subscription.status === "websocket_failed_ping_pong"
-            ) {
-                await this.tes.unsubscribe(subscription.id);
-                console.log(
-                    "Unsubscribed from",
-                    subscription.type,
-                    "for",
-                    this.displayName
-                );
+        // Purge ALL existing subscriptions for this user before re-subscribing.
+        // Previous runs (especially crashes / hard restarts) leave "zombie"
+        // websocket sessions that still count against Twitch's limit of 3
+        // websocket connections per user, causing
+        // "429 ... number of websocket transports limit exceeded". Deleting
+        // them frees the transports; we recreate the ones we need right after.
+        let cursor: string | undefined = undefined;
+        let purged = 0;
+        do {
+            const subscriptions = await this.tes.getSubscriptions(cursor);
+            for (const subscription of subscriptions.data || []) {
+                try {
+                    await this.tes.unsubscribe(subscription.id);
+                    purged++;
+                } catch (e) {
+                    console.error(
+                        `Failed to purge subscription ${subscription.id} for ${this.displayName}`,
+                        e
+                    );
+                }
             }
-        }
+            cursor = subscriptions.pagination?.cursor;
+        } while (cursor);
+        if (purged > 0)
+            console.log(
+                `Purged ${purged} stale subscription(s) for ${this.displayName}`
+            );
         this.subscribeToAllEvents();
         setTimeout(async () => {
             const subscriptions = await this.tes.getSubscriptions();
@@ -341,13 +353,15 @@ export class Streamer extends User {
         }
     }*/
 
-    private subscribeToAllEvents() {
-        const events = Object.keys(this.eventsSubscriptions);
-        events.forEach((event, index) => {
-            setTimeout(() => {
-                this.subscribe(this.eventsSubscriptions[event]);
-            }, index * 200);
-        });
+    private async subscribeToAllEvents() {
+        // Subscribe sequentially so every event reuses a single websocket
+        // connection. Firing them concurrently makes TES open a new connection
+        // for each call that runs before the first one is established (up to
+        // Twitch's limit of 3 per user), wasting transports and risking
+        // "429 ... number of websocket transports limit exceeded".
+        for (const event of Object.values(this.eventsSubscriptions)) {
+            await this.subscribe(event);
+        }
 
         /*setInterval(() => {
             // trigger a random event
