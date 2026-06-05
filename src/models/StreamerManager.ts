@@ -44,6 +44,20 @@ export class StreamerManager {
         this.streamers.delete(owner);
     }
 
+    public async stopAll(): Promise<void> {
+        console.log(`stopAll: disconnecting ${this.streamers.size} streamer(s)`);
+        await Promise.all(
+            Array.from(this.streamers.values()).map(async (streamer) => {
+                try {
+                    await streamer.stop();
+                } catch (error) {
+                    console.error("stopAll: failed to stop a streamer", error);
+                }
+            })
+        );
+        this.streamers.clear();
+    }
+
     public async loadStreamers() {
         const newStreamers = await this.getPremiumUsers();
         console.log(

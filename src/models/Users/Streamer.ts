@@ -370,7 +370,7 @@ export class Streamer extends User {
     }
 
     public async stop() {
-        await this.tes.disconnect();
+        if (this.tes) await this.tes.disconnect();
         clearTimeout(this.refreshTimeout);
         console.log(`Disconnected from ${this.displayName}`);
     }
